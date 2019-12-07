@@ -13,6 +13,8 @@ const scenes = {
     "Postprocessing": PostprocessingScene,
 };
 const initialScene = "Postprocessing";
+ 
+
 
 // Then we add those scenes to the game object and ask it to start the initial scene
 game.addScenes(scenes);
