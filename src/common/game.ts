@@ -13,7 +13,7 @@ export abstract class Scene {
 
     public abstract load(): void; // Here we will tell the loader which files to load from the webserver
     public abstract start(): void; // Here we will initialize the scene objects before entering the draw loop 
-    public abstract draw(deltaTime: number, trans: number): void; // Here will draw the scene (deltaTime is the difference in time between this frame and the past frame in milliseconds)
+    public abstract draw(deltaTime: number): void; // Here will draw the scene (deltaTime is the difference in time between this frame and the past frame in milliseconds)
     public abstract end(): void; // Here we free the memory from objects we allocated
 }
 
@@ -28,7 +28,6 @@ export default class Game {
     nextScene: Scene = null; // The scene that will replace the current scene after its files have been loaded
     nextSceneReady: boolean = false; // Whether the files requested by the next scene has been loaded or not 
     lastTick: number; // The time of the last frame in milliseconds (used to calculate delta time)
-    x :number;
 
     constructor(canvas: HTMLCanvasElement){
         this.canvas = canvas;
@@ -43,7 +42,6 @@ export default class Game {
         }); // This command loads the WebGL2 context which we will use to draw
         this.input = new Input(this.canvas);
         this.lastTick = performance.now();
-        this.x = 0;
         this.loop(performance.now()); // Start the game loop
     }
 
@@ -75,11 +73,7 @@ export default class Game {
             this.currentScene.start(); // Tell the scene to initialize its objects
         }
         if(this.currentScene != null){
-            if(this.x < 0.5)
-                this.x = this.x + 0.001;
-            else
-                this.x = 0
-            this.currentScene.draw(time-this.lastTick,this.x ); // Tell the scene to draw itself
+            this.currentScene.draw(time-this.lastTick); // Tell the scene to draw itself
         }
         this.input.update(); // Update some information about the user input
         this.lastTick = time;

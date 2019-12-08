@@ -4,6 +4,7 @@ import Mesh from '../common/mesh';
 import * as MeshUtils from '../common/mesh-utils';
 import Camera from '../common/camera';
 import PlayerContoller from '../common/Player-controllers/Player-controller';
+import GroundController from '../common/ground-controller/ground-controller';
 import { vec3, mat4, quat } from 'gl-matrix';
 import { Vector, Selector } from '../common/dom-utils';
 import { createElement } from 'tsx-create-element';
@@ -14,6 +15,7 @@ export default class PostprocessingScene extends Scene {
     camera: Camera;
     //cameracontroller: FlyCameraController;
     playercontroller: PlayerContoller;
+    groundcontroller: GroundController;
     meshes: { [name: string]: Mesh } = {};
     textures: { [name: string]: WebGLTexture } = {};
     samplers: { [name: string]: WebGLSampler } = {};
@@ -23,7 +25,6 @@ export default class PostprocessingScene extends Scene {
         "light",
         "fog",
         "blit"
-        
     ];
 
     readonly effects = {
@@ -137,6 +138,10 @@ export default class PostprocessingScene extends Scene {
         mat4.translate(moonMat, moonMat, [0, 1, 0]);
         this.playercontroller = new PlayerContoller(moonMat,this.game.input);
         
+        let groundMat = mat4.create();
+        mat4.scale(groundMat, groundMat, [500, 1, 10]);
+        this.groundcontroller = new GroundController(groundMat,0.001);   
+        
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.cullFace(this.gl.BACK);
         this.gl.frontFace(this.gl.CCW);
@@ -149,10 +154,9 @@ export default class PostprocessingScene extends Scene {
     }
 
     
-    public draw(deltaTime: number, trans: number): void {
-        //this.cameracontroller.update(deltaTime);
+    public draw(deltaTime: number): void {
         this.playercontroller.update(deltaTime);
-
+        this.groundcontroller.update();    
         
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
@@ -169,17 +173,9 @@ export default class PostprocessingScene extends Scene {
 
             program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
 
-            let groundMat = mat4.create();
-            mat4.scale(groundMat, groundMat, [500, 1, 10]);
-            if(trans != 1000){
-                   mat4.translate(groundMat, groundMat, [trans, 0, 0]);
-            }
-            else{
-                mat4.translate(groundMat,groundMat,[0,0,0]);
-                trans = 0;
-            }
+            
 
-
+            let groundMat = this.groundcontroller.VPmatrix    
             program.setUniformMatrix4fv("M", false, groundMat);
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), groundMat));
             program.setUniform4f("tint", [0.96, 0.91, 0.64, 1]);

@@ -3,13 +3,6 @@ import Input from '../input';
 import { vec3, vec2, mat4 } from 'gl-matrix';
 import { Key } from 'ts-key-enum';
 
-// This is a controller to simulate a flying Camera
-// The controls are:
-// Hold Left-Mouse-Button and Drag to rotate camera
-// Hold Left-Mouse-Button + WASD to move and QE to go up or down
-// Mouse Wheel to zoom in or out 
-// Press T to toggle between Perspective and Orthographic
-
 export default class PlayerController {
     VPmatrix: mat4;
     input: Input;
@@ -30,10 +23,25 @@ export default class PlayerController {
             
             if(this.input.isButtonDown(0)){
                 
-            const movement = vec3.create();
-            if(this.input.isKeyDown("d")) movement[2] += deltaTime;
-            if(this.input.isKeyDown("a")) movement[2] -= deltaTime;
-            mat4.translate(this.VPmatrix,this.VPmatrix,vec3.normalize(movement,movement)); 
+            let movement = vec3.create();        
+            if(this.input.isKeyDown("a")) movement[2] += deltaTime/100;
+            if(this.input.isKeyDown("d")) movement[2] -= deltaTime/100;
+            if(this.VPmatrix[14] < 9 && this.VPmatrix[14] > -9){
+            mat4.translate(this.VPmatrix,this.VPmatrix,[movement[0],movement[1],movement[2]]);
+         }
+         else{
+             if(this.VPmatrix[14] >= 9)
+             {
+                if(this.input.isKeyDown("d")){ movement[2] -= deltaTime/100;
+                mat4.translate(this.VPmatrix,this.VPmatrix,[movement[0],movement[1],movement[2]]);
+                }
+             }
+             else if(this.VPmatrix[14] <= -9){
+                if(this.input.isKeyDown("a")){ movement[2] += deltaTime/100;
+                mat4.translate(this.VPmatrix,this.VPmatrix,[movement[0],movement[1],movement[2]]);
+                }
+             }
+         }
         }
         mat4.rotateZ(this.VPmatrix, this.VPmatrix, deltaTime / 100);
          
