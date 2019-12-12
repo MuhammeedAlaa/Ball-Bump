@@ -52,6 +52,73 @@ export function Plane(gl: WebGL2RenderingContext, texCoords: {min:[number, numbe
 }
 
 
+export function ColoredCube(gl: WebGL2RenderingContext): Mesh {
+    let mesh = createEmptyMesh(gl);
+    mesh.setBufferData("positions", new Float32Array([
+        //Upper Face
+        -1,  1, -1,
+        -1,  1,  1,
+         1,  1,  1,
+         1,  1, -1,
+        //Lower Face
+        -1, -1, -1,
+         1, -1, -1,
+         1, -1,  1,
+        -1, -1,  1,
+        //Right Face
+         1, -1, -1,
+         1,  1, -1,
+         1,  1,  1,
+         1, -1,  1,
+        //Left Face
+        -1, -1, -1,
+        -1, -1,  1,
+        -1,  1,  1,
+        -1,  1, -1,
+        //Front Face
+        -1, -1,  1,
+         1, -1,  1,
+         1,  1,  1,
+        -1,  1,  1,
+        //Back Face
+        -1, -1, -1,
+        -1,  1, -1,
+         1,  1, -1,
+         1, -1, -1
+    ]), gl.STATIC_DRAW);
+    mesh.setBufferData("colors", new Uint8Array([
+        //Upper Face
+        ...RED, ...RED, ...RED, ...RED,
+        //Lower Face
+        ...GREEN, ...GREEN, ...GREEN, ...GREEN,
+        //Right Face
+        ...BLUE, ...BLUE, ...BLUE, ...BLUE,
+        //Left Face
+        ...YELLOW, ...YELLOW, ...YELLOW, ...YELLOW,
+        //Front Face
+        ...MAGENTA, ...MAGENTA, ...MAGENTA, ...MAGENTA,
+        //Back Face
+        ...CYAN, ...CYAN, ...CYAN, ...CYAN,
+    ]), gl.STATIC_DRAW);
+    mesh.setElementsData(new Uint32Array([
+        //Upper Face
+        0, 1, 2, 2, 3, 0,
+        //Lower Face
+        4, 5, 6, 6, 7, 4,
+        //Right Face
+        8, 9, 10, 10, 11, 8,
+        //Left Face
+        12, 13, 14, 14, 15, 12,
+        //Front Face
+        16, 17, 18, 18, 19, 16,
+        //Back Face
+        20, 21, 22, 22, 23, 20, 
+    ]), gl.STATIC_DRAW);
+    return mesh;
+}
+
+
+
 export function Sphere(gl: WebGL2RenderingContext, resolution: number | [number, number] = 32): Mesh {
     if(typeof resolution === "number") resolution = [2*resolution, resolution]
     resolution = resolution.map((x)=>x>=1?x:1) as [number, number];
