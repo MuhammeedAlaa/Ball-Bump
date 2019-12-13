@@ -5,7 +5,7 @@ import * as MeshUtils from '../common/mesh-utils';
 import Camera from '../common/camera';
 import PlayerController from '../common/Cotrollers/Player-controller';
 import GroundController from '../common/Cotrollers/ground-controller';
-import { vec3, mat4, quat } from 'gl-matrix';
+import { vec3, mat4, quat, vec4 } from 'gl-matrix';
 import ObstacleController from '../common/Cotrollers/obstacle-controller';
 
 // In this scene we will draw a scene to multiple targets then use the target to do post processing
@@ -126,8 +126,8 @@ export default class Level1 extends Scene {
 
         this.camera = new Camera();
         this.camera.type = 'perspective';
-        this.camera.position = vec3.fromValues(4, 15, 0);
-        this.camera.direction = vec3.fromValues(-9, -9, 0);
+        this.camera.position = vec3.fromValues(4, 14, 0);
+        this.camera.direction = vec3.fromValues(-5, -9, 0);
         this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
 
 
@@ -135,45 +135,92 @@ export default class Level1 extends Scene {
         
         let moonMat = mat4.create();
         mat4.translate(moonMat, moonMat, [0, 1, 0]);
-        this.playercontroller = new PlayerController(moonMat,this.game.input);
+        let tr = vec3.create();
+        vec3.add(tr,tr,[0,1,0]);
+        this.playercontroller = new PlayerController(moonMat,this.game.input,tr);
+
 
                 
         let groundMat = mat4.create();
         mat4.scale(groundMat, groundMat, [8000, 1, 15]);
-        this.groundcontroller = new GroundController(groundMat,0.001);  
+        this.groundcontroller = new GroundController(groundMat,0.005);  
         
 
 
-
-     
-        for(let x = 1; x <= 9; x++){
-                let cubeMat = mat4.create();
-                mat4.scale(cubeMat,cubeMat,[1,1,1]);
-                mat4.translate(cubeMat, cubeMat, [-5, 1 , x*3 - 15]);
-                this.cubeController[x] = new ObstacleController(cubeMat,0.001);
-    }
-
-            
+        this.createwave(25);
+        
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.cullFace(this.gl.BACK);
         this.gl.frontFace(this.gl.CCW);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
+        
+    }
+
+    private createwave(dis: number):void{
+        this.cubeNumber = 49;
+        let index = 1
+            for(let x = -12; x <= 12; x+=4)
+            for(let z = -12; z <= 12; z+=4){
+                let cubeMat = mat4.create();
+            mat4.scale(cubeMat,cubeMat,[1,1,1]);
+            mat4.translate(cubeMat, cubeMat, [x-dis, 1, z]);
+
+            let min = vec3.create();
+            vec3.add(min,min , [x -dis - 2, 1 - 2, z -2]);
+
+            let max = vec3.create();
+            vec3.add(max,max , [x -dis + 2, 1 + 2, z + 2]);
+
+            this.cubeController[index] = new ObstacleController(cubeMat,0.12,min,max);
+            index++;
+        }
+    }
+
+    private detcoll(cubeController:ObstacleController): boolean{
+       
+            let dmin = 0.0;
+            let center = this.playercontroller.postion;
+            let bmin = cubeController.Minpos;
+            let bmax = cubeController.Maxpos;
+
+            if (center[0] < bmin[0]) {
+                dmin += Math.pow(center[0] - bmin[0], 2);
+            } else if (center[0] > bmax[0]) {
+                dmin += Math.pow(center[0] - bmax[0], 2);
+            }
+
+            if (center[1] < bmin[1]) {
+                dmin += Math.pow(center[1] - bmin[1], 2);
+            } else if (center[1] > bmax[1]) {
+                dmin += Math.pow(center[1] - bmax[1], 2);
+            }
+
+            if (center[2] < bmin[2]) {
+                dmin += Math.pow(center[2] - bmin[2], 2);
+            } else if (center[2] > bmax[2]) {
+                dmin += Math.pow(center[2] - bmax[2], 2);
+            }
+
+            return dmin  <= Math.pow(1, 2) ;
+
+      
     }
 
     
     public draw(deltaTime: number): void {
         this.playercontroller.update(deltaTime);
         this.groundcontroller.update(); 
-
-        for(let x = 1; x <= 9; x++)
+        
+        for(let x = 1; x <= this.cubeNumber; x++){
+           this.cubeController[x].colstatus= this.detcoll( this.cubeController[x]);
             this.cubeController[x].update(deltaTime);
+    }
+    for(let x = 1; x <= 7; x++)
+    if(this.cubeController[x].colstatus === true )
+        this.createwave(90);
 
-          
-        
-
-        
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
         {
@@ -187,7 +234,7 @@ export default class Level1 extends Scene {
             let program = this.programs['3d'];
             program.use();
 
-            for(let x = 1; x <= 9; x++){
+            for(let x = 1; x <= this.cubeNumber; x++){
             let MatCube = this.cubeController[x].M;
             program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
             program.setUniformMatrix4fv("M", false, MatCube);
@@ -245,6 +292,7 @@ export default class Level1 extends Scene {
                     this.gl.bindSampler(0, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['color-target']);
                     program.setUniform1i('color_sampler', 0);
+                    
                     
                     this.gl.activeTexture(this.gl.TEXTURE1);
                     this.gl.bindSampler(1, this.samplers['postprocess']);

@@ -5,12 +5,14 @@ import { vec3, vec2, mat4 } from 'gl-matrix';
 export default class PlayerController {
     M: mat4;
     input: Input;
+    postion: vec3;
 
 
-    constructor(VPmatreix: mat4, input: Input) {
+    constructor(VPmatreix: mat4, input: Input, postion: vec3) {
 
         this.input = input;
         this.M = VPmatreix;
+        this.postion = postion;
     }
 
     public update(deltaTime: number) {
@@ -34,6 +36,8 @@ export default class PlayerController {
                 }
             }
         }
+        
         mat4.rotateZ(this.M, this.M, deltaTime / 100);
+        vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
     }
 }
