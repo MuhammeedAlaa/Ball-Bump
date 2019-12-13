@@ -173,7 +173,7 @@ export default class Level1 extends Scene {
             let max = vec3.create();
             vec3.add(max,max , [x -dis + 0.5, 1 + 0.5, z + 0.5]);
 
-            this.cubeController[index] = new ObstacleController(cubeMat,0.12,min,max);
+            this.cubeController[index] = new ObstacleController(cubeMat,0.2,min,max);
             index++;
         }
     }
