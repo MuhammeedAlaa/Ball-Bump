@@ -168,10 +168,10 @@ export default class Level1 extends Scene {
             mat4.translate(cubeMat, cubeMat, [x-dis, 1, z]);
 
             let min = vec3.create();
-            vec3.add(min,min , [x -dis - 2, 1 - 2, z -2]);
+            vec3.add(min,min , [x -dis - 0.5, 1 - 0.5, z -0.5]);
 
             let max = vec3.create();
-            vec3.add(max,max , [x -dis + 2, 1 + 2, z + 2]);
+            vec3.add(max,max , [x -dis + 0.5, 1 + 0.5, z + 0.5]);
 
             this.cubeController[index] = new ObstacleController(cubeMat,0.12,min,max);
             index++;
@@ -179,31 +179,14 @@ export default class Level1 extends Scene {
     }
 
     private detcoll(cubeController:ObstacleController): boolean{
-       
-            let dmin = 0.0;
-            let center = this.playercontroller.postion;
-            let bmin = cubeController.Minpos;
-            let bmax = cubeController.Maxpos;
-
-            if (center[0] < bmin[0]) {
-                dmin += Math.pow(center[0] - bmin[0], 2);
-            } else if (center[0] > bmax[0]) {
-                dmin += Math.pow(center[0] - bmax[0], 2);
-            }
-
-            if (center[1] < bmin[1]) {
-                dmin += Math.pow(center[1] - bmin[1], 2);
-            } else if (center[1] > bmax[1]) {
-                dmin += Math.pow(center[1] - bmax[1], 2);
-            }
-
-            if (center[2] < bmin[2]) {
-                dmin += Math.pow(center[2] - bmin[2], 2);
-            } else if (center[2] > bmax[2]) {
-                dmin += Math.pow(center[2] - bmax[2], 2);
-            }
-
-            return dmin  <= Math.pow(1, 2) ;
+             let center = this.playercontroller.postion;
+             let bmin = cubeController.Minpos;
+             let bmax = cubeController.Maxpos;
+             var x = Math.max(bmin[0], Math.min(center[0], bmax[0]));
+             var y = Math.max(bmin[1], Math.min(center[1], bmax[1]));
+             var z = Math.max(bmin[2], Math.min(center[2], bmax[2]));
+             var distance = Math.sqrt((x - center[0]) * (x - center[0]) + (y - center[1]) * (y - center[1]) + (z - center[2]) * (z - center[2]));
+            return distance < 1.5;
 
       
     }

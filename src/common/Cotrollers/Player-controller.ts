@@ -21,23 +21,26 @@ export default class PlayerController {
         if (this.input.isKeyDown("d")) movement[2] -= deltaTime / 70;
         if (this.M[14] < 14 && this.M[14] > -14) {
             mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
+            vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
         }
         else {
             if (this.M[14] >= 14) {
                 if (this.input.isKeyDown("d")) {
                 movement[2] -= deltaTime / 100;
                     mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
+                    vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
                 }
             }
             else if (this.M[14] <= -14) {
                 if (this.input.isKeyDown("a")) {
                 movement[2] += deltaTime / 100;
                     mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
+                    vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
                 }
             }
         }
         
         mat4.rotateZ(this.M, this.M, deltaTime / 100);
-        vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
+       
     }
 }
