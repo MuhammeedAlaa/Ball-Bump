@@ -186,7 +186,7 @@ export default class Level1 extends Scene {
              var y = Math.max(bmin[1], Math.min(center[1], bmax[1]));
              var z = Math.max(bmin[2], Math.min(center[2], bmax[2]));
              var distance = Math.sqrt((x - center[0]) * (x - center[0]) + (y - center[1]) * (y - center[1]) + (z - center[2]) * (z - center[2]));
-            return distance < 1.5;
+            return distance < 2;
 
       
     }
