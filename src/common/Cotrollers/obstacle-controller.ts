@@ -7,19 +7,31 @@ export default class ObstacleController {
     colstatus: boolean;
     Minpos: vec3;
     Maxpos: vec3;
-    constructor(M: mat4,  Step: number, Minpos: vec3, Maxpos: vec3) {
-        this.M = M;
-        this.Step = Step;
-        this.act = Step;
+    center: vec3;
+    constructor(v: vec3) {
+        this.M = mat4.create();
+        this.Step = 0.1;
+        this.act = 0.1;
         this.colstatus = false;
-        this.Minpos = Minpos;
-        this.Maxpos = Maxpos;
+        
+        this.Minpos = vec3.create();
+        this.Maxpos = vec3.create();
+  
+        this.center = v;
+        vec3.add(this.Minpos,v,[2,0,2]);
+        vec3.add(this.Maxpos,v,[-2,4,-2]);
     }
 
     public update(deltaTime: number) {
-        mat4.translate(this.M, this.M, [this.Step, 0, 0]);
-        vec3.add(this.Minpos,this.Minpos,[this.Step, 0,0]);
-        this.act += this.Step;
+        if(this.colstatus != true){
+            this.M = mat4.create();
+            mat4.translate(this.M, this.M, [this.act, 2, 0] );
+            mat4.translate(this.M, this.M, this.center );
+            mat4.scale(this.M, this.M, [2, 2, 2]);
+            this.act += this.Step;
+            vec3.add(this.Minpos,this.Minpos,[0.1,0,0]);
+            vec3.add(this.Maxpos,this.Maxpos,[0.1,0,0]);
+        }
         if(this.colstatus){
             mat4.translate(this.M,this.M,[15,15,15]);
         }

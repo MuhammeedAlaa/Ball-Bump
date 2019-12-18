@@ -163,17 +163,9 @@ export default class Level1 extends Scene {
         let index = 1
             for(let x = -12; x <= 12; x+=4)
             for(let z = -12; z <= 12; z+=4){
-                let cubeMat = mat4.create();
-            mat4.scale(cubeMat,cubeMat,[1,1,1]);
-            mat4.translate(cubeMat, cubeMat, [x-dis, 1, z]);
-
-            let min = vec3.create();
-            vec3.add(min,min , [x -dis - 0.5, 1 - 0.5, z -0.5]);
-
-            let max = vec3.create();
-            vec3.add(max,max , [x -dis + 0.5, 1 + 0.5, z + 0.5]);
-
-            this.cubeController[index] = new ObstacleController(cubeMat,0.2,min,max);
+                let v = vec3.create();
+                vec3.add(v,v,[x-dis,2,z])
+            this.cubeController[index] = new ObstacleController(v);
             index++;
         }
     }
@@ -197,7 +189,7 @@ export default class Level1 extends Scene {
         this.groundcontroller.update(); 
         
         for(let x = 1; x <= this.cubeNumber; x++){
-           this.cubeController[x].colstatus= this.detcoll( this.cubeController[x]);
+           this.cubeController[x].colstatus= this.detcoll(this.cubeController[x]);
             this.cubeController[x].update(deltaTime);
     }
     for(let x = 1; x <= 7; x++)
