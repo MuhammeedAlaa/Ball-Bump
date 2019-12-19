@@ -9,6 +9,8 @@ export default class ObstacleController {
     Maxpos: vec3;
     center: vec3;
     texturetype: string; //The used texture on the cube
+    color:number;
+    hold:number;
 
     constructor(v: vec3) {
         this.M = mat4.create();
@@ -18,13 +20,15 @@ export default class ObstacleController {
         
         this.Minpos = vec3.create();
         this.Maxpos = vec3.create();
+        this.hold = 0;
   
         this.center = v;
         vec3.add(this.Minpos,v,[1.142,0,1.142]);
-        vec3.add(this.Maxpos,v,[-1.142,2.285,-1.142]);
+        vec3.add(this.Maxpos,v,[1.142,2.285,-1.142]);
     }
 
     public update(deltaTime: number) {
+        if(this.hold === 0){
         if(this.colstatus === false)
         {
             this.M = mat4.create();
@@ -38,7 +42,8 @@ export default class ObstacleController {
         }
         else if(this.colstatus)
         {
-            mat4.translate(this.M,this.M,[15,15,15]);
+            mat4.translate(this.M,this.M,[0,-15,0]);
         }
+    }
     }
 }

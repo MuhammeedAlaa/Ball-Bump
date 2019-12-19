@@ -166,7 +166,7 @@ export default class Level1 extends Scene {
         
 
 
-        this.createwave(25);
+        this.createwave(50);
         
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.cullFace(this.gl.BACK);
@@ -190,11 +190,13 @@ export default class Level1 extends Scene {
             let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
             if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
             {
-                this.cubeController[index].texturetype = 'Cubet2';   
+                this.cubeController[index].texturetype = 'Cubet2'; 
+                this.cubeController[index].color = 1;  
             }
             else
             {
                 this.cubeController[index].texturetype = 'Cubet';
+                this.cubeController[index].color = 0;
             }
             index++;
         }
@@ -227,10 +229,26 @@ export default class Level1 extends Scene {
             
             this.cubeController[x].update(deltaTime);
         }
-    for(let x = 1; x <= 7; x++)
-    if(this.cubeController[x].colstatus === true )
-        this.createwave(50);
-
+    for(let x = 1; x <= this.cubeNumber; x++)
+    if(this.cubeController[x].colstatus === true && this.cubeController[x].color === 1 )
+    {
+        this.playercontroller.die = 1;
+        this.groundcontroller.hold = 1;
+        for(let z = 1; z <= this.cubeNumber; z++)
+        this.cubeController[z].hold = 1;
+        break;
+        
+    }
+    else
+    {
+        for(let y = 1; y <= 7; y++)
+    if(this.cubeController[y].colstatus === true  && this.playercontroller.gre > 75)
+    {
+        console.error(`Failed to load ${this.playercontroller.gre}:`);
+        this.playercontroller.gre = 0;
+        console.error(`Failed to load ${this.playercontroller.gre}:`);
+        this.createwave(50);}
+    }
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
         {
