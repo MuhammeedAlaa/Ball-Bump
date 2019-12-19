@@ -216,7 +216,7 @@ export default class Level1 extends Scene {
     }
 
     
-    public draw(deltaTime: number): void {
+    public draw(deltaTime: number,time :number): void {
         this.playercontroller.update(deltaTime);
         this.groundcontroller.update(); 
         
@@ -242,12 +242,12 @@ export default class Level1 extends Scene {
     else
     {
         for(let y = 1; y <= 7; y++)
-    if(this.cubeController[y].colstatus === true  && this.playercontroller.gre > 75)
+    if(this.cubeController[y].colstatus === true  && this.playercontroller.gre > 75)//5
     {
-        console.error(`Failed to load ${this.playercontroller.gre}:`);
+        for(let z = 1; z <= this.cubeNumber; z++)
+        delete this.cubeController[z]
         this.playercontroller.gre = 0;
-        console.error(`Failed to load ${this.playercontroller.gre}:`);
-        this.createwave(50);}
+        this.createwave(50);}//4
     }
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
@@ -268,6 +268,7 @@ export default class Level1 extends Scene {
             program.setUniformMatrix4fv("M", false, MatCube);
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
             program.setUniform4f("tint", [1, 1, 1, 1]);
+           
             this.gl.activeTexture(this.gl.TEXTURE3);
             this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
             program.setUniform1i('texture_sampler', 3);
@@ -295,7 +296,13 @@ export default class Level1 extends Scene {
             
             program.setUniformMatrix4fv("M", false, this.playercontroller.M);
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), this.playercontroller.M));
-            program.setUniform4f("tint", [1, 1, 1, 1]);
+            if(this.playercontroller.die === 0){
+                program.setUniform4f("tint", [1, 1, 1, 1]);
+            }
+            else
+            {
+                program.setUniform4f("tint", [1, ((Math.abs(Math.sin(time*1000))+0.5)/2)+0.2, ((Math.abs(Math.sin(time*50))+0.2)/2)+0.5, 1]);
+            }    
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ball']);
@@ -330,14 +337,14 @@ export default class Level1 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', 10);
-                    program.setUniform4f('fog_color', [0.76,0.83,0.56, 1]);
+                    program.setUniform1f('fog_distance', 10);//4
+                    program.setUniform4f('fog_color', [0.76,0.83,0.56, 1]);//3
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.fromValues(1,0,0);
                     vec3.normalize(light_direction, light_direction);
                     program.setUniform3f('light_direction', light_direction);
-                    program.setUniform4f('light_color', [0.9, 0.8, 0.7, 1]);
-                    program.setUniform4f('ambient_color', [0.1, 0.1, 0.1, 1]);
+                    program.setUniform4f('light_color', [1, 1, 1, 1]);//1
+                    program.setUniform4f('ambient_color', [0.1, 0.1, 0.1, 1]);//2
                     this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
 
                 }

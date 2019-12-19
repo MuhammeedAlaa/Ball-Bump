@@ -13,7 +13,7 @@ export abstract class Scene {
 
     public abstract load(): void; // Here we will tell the loader which files to load from the webserver
     public abstract start(): void; // Here we will initialize the scene objects before entering the draw loop 
-    public abstract draw(deltaTime: number): void; // Here will draw the scene (deltaTime is the difference in time between this frame and the past frame in milliseconds)
+    public abstract draw(deltaTime: number,time: number): void; // Here will draw the scene (deltaTime is the difference in time between this frame and the past frame in milliseconds)
     public abstract end(): void; // Here we free the memory from objects we allocated
 }
 
@@ -73,7 +73,7 @@ export default class Game {
             this.currentScene.start(); // Tell the scene to initialize its objects
         }
         if(this.currentScene != null){
-            this.currentScene.draw(time-this.lastTick); // Tell the scene to draw itself
+            this.currentScene.draw(time-this.lastTick,time); // Tell the scene to draw itself
         }
         this.input.update(); // Update some information about the user input
         this.lastTick = time;
