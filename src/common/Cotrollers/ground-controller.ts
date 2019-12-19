@@ -11,13 +11,13 @@ export default class GroundController {
 
     public update() {
             this.act += this.Step
-            if(this.act < 0.7){
+            if(this.act < 0.4){
                 mat4.translate(this.M, this.M, [this.Step, 0, 0]);
          }
          else{
              this.act = this.Step;
              this.M = mat4.create();
-             mat4.scale(this.M, this.M, [8000, 1, 15]);
+             mat4.scale(this.M, this.M, [100, 1, 15]);
          } 
         
     }

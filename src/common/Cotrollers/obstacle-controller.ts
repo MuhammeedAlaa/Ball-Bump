@@ -18,21 +18,24 @@ export default class ObstacleController {
         this.Maxpos = vec3.create();
   
         this.center = v;
-        vec3.add(this.Minpos,v,[2,0,2]);
-        vec3.add(this.Maxpos,v,[-2,4,-2]);
+        vec3.add(this.Minpos,v,[1.142,0,1.142]);
+        vec3.add(this.Maxpos,v,[-1.142,2.285,-1.142]);
     }
 
     public update(deltaTime: number) {
-        if(this.colstatus != true){
+        if(this.colstatus === false)
+        {
             this.M = mat4.create();
-            mat4.translate(this.M, this.M, [this.act, 2, 0] );
+            mat4.translate(this.M, this.M, [this.act, 0, 0] );
             mat4.translate(this.M, this.M, this.center );
-            mat4.scale(this.M, this.M, [2, 2, 2]);
+            mat4.scale(this.M, this.M, [0.3, 0.3, 0.3]);
+            mat4.rotateY(this.M,this.M,Math.PI/2)
             this.act += this.Step;
-            vec3.add(this.Minpos,this.Minpos,[0.1,0,0]);
-            vec3.add(this.Maxpos,this.Maxpos,[0.1,0,0]);
+            vec3.add(this.Minpos,this.Minpos,[this.Step,0,0]);
+            vec3.add(this.Maxpos,this.Maxpos,[this.Step,0,0]);
         }
-        if(this.colstatus){
+        else if(this.colstatus)
+        {
             mat4.translate(this.M,this.M,[15,15,15]);
         }
     }

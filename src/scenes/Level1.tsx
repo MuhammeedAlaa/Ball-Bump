@@ -36,8 +36,13 @@ export default class Level1 extends Scene {
             ["color.frag"]:{url:'shaders/color.frag', type:'text'},
             ["fullscreen.vert"]: { url: 'shaders/post-process/fullscreen.vert', type: 'text' },
             ...Object.fromEntries(this.shaders.map((s) => [`${s}.frag`, { url: `shaders/post-process/${s}.frag`, type: 'text' }])),
-            ["Ball-texture"]: { url: 'images/ball.jpg', type: 'image' },
-            ["Ground-texture"]: { url: 'images/ground.jpg', type: 'image' }
+            //["Ball-texture"]: { url: 'images/ball.jpg', type: 'image' },
+            ["Ball-texture"]: { url: 'images/earth.jpg', type: 'image' },
+            //["Ground-texture"]: { url: 'images/ground.jpg', type: 'image' },
+            ["Ground-texture"]: { url: 'images/Blue3.png', type: 'image'},
+            ["cube-model"]:{url: 'models/Blue Cube/chr_phantom_puzzle.obj',type: 'text'},
+            ["cube-texture"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD01.png',type:'image'},
+            ["cube-texture2"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',type:'image'}
         });
     }
 
@@ -57,9 +62,10 @@ export default class Level1 extends Scene {
         }
 
         this.meshes['Ball'] = MeshUtils.Sphere(this.gl);
-        this.meshes['Ground'] = MeshUtils.Plane(this.gl, { min: [0, 0], max: [20, 20] });
-        this.meshes['Cube'] = MeshUtils.ColoredCube(this.gl);
-
+        this.meshes['Ground'] = MeshUtils.Plane(this.gl, { min: [0, 0], max: [1, 1] });
+        //this.meshes['Cube'] = MeshUtils.ColoredCube(this.gl);
+        this.meshes['Cube'] = MeshUtils.LoadOBJMesh(this.gl, this.game.loader.resources["cube-model"]);
+        
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
 
         this.textures['Ball'] = this.gl.createTexture();
@@ -72,6 +78,19 @@ export default class Level1 extends Scene {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
         this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['Ground-texture']);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+
+        //Loading the Cube textures
+        this.textures['Cubet'] = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet']);
+        this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['cube-texture']);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+
+        this.textures['Cubet2'] = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet2']);
+        this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['cube-texture2']);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
 
         // We will use the multi render target setup described in the previous scene
@@ -133,17 +152,17 @@ export default class Level1 extends Scene {
 
         
         
-        let moonMat = mat4.create();
-        mat4.translate(moonMat, moonMat, [0, 1, 0]);
+        let PlayerMat = mat4.create();
+        mat4.translate(PlayerMat, PlayerMat, [0, 1, 0]);
         let tr = vec3.create();
         vec3.add(tr,tr,[0,1,0]);
-        this.playercontroller = new PlayerController(moonMat,this.game.input,tr);
+        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr);
 
 
                 
         let groundMat = mat4.create();
-        mat4.scale(groundMat, groundMat, [8000, 1, 15]);
-        this.groundcontroller = new GroundController(groundMat,0.005);  
+        mat4.scale(groundMat, groundMat, [100, 1, 15]);
+        this.groundcontroller = new GroundController(groundMat,0.002);  
         
 
 
@@ -160,11 +179,11 @@ export default class Level1 extends Scene {
 
     private createwave(dis: number):void{
         this.cubeNumber = 49;
-        let index = 1
+        let index = 1;
             for(let x = -12; x <= 12; x+=4)
             for(let z = -12; z <= 12; z+=4){
                 let v = vec3.create();
-                vec3.add(v,v,[x-dis,2,z])
+                vec3.add(v,v,[x-dis,0,z])
             this.cubeController[index] = new ObstacleController(v);
             index++;
         }
@@ -188,10 +207,15 @@ export default class Level1 extends Scene {
         this.playercontroller.update(deltaTime);
         this.groundcontroller.update(); 
         
-        for(let x = 1; x <= this.cubeNumber; x++){
-           this.cubeController[x].colstatus= this.detcoll(this.cubeController[x]);
+        for(let x = 1; x <= this.cubeNumber; x++)
+        {
+            if(this.cubeController[x].colstatus === false)
+            {
+                this.cubeController[x].colstatus= this.detcoll(this.cubeController[x]);
+            }
+            
             this.cubeController[x].update(deltaTime);
-    }
+        }
     for(let x = 1; x <= 7; x++)
     if(this.cubeController[x].colstatus === true )
         this.createwave(90);
@@ -200,7 +224,7 @@ export default class Level1 extends Scene {
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
         {
             this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
-            this.gl.clearBufferfv(this.gl.COLOR, 0, [0.76,0.83,0.56, 1]);
+            this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67,0.84,0.9, 1]);
             this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
             this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
 
@@ -216,7 +240,7 @@ export default class Level1 extends Scene {
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
             program.setUniform4f("tint", [1, 1, 1, 1]);
             this.gl.activeTexture(this.gl.TEXTURE3);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet']);
             program.setUniform1i('texture_sampler', 3);
             this.gl.bindSampler(3, this.samplers['regular']);
 
