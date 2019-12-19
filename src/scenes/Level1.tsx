@@ -180,11 +180,22 @@ export default class Level1 extends Scene {
     private createwave(dis: number):void{
         this.cubeNumber = 49;
         let index = 1;
+            
             for(let x = -12; x <= 12; x+=4)
             for(let z = -12; z <= 12; z+=4){
                 let v = vec3.create();
-                vec3.add(v,v,[x-dis,0,z])
+                vec3.add(v,v,[x-dis,0,z]);
             this.cubeController[index] = new ObstacleController(v);
+            //Select the applied texture
+            let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
+            if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
+            {
+                this.cubeController[index].texturetype = 'Cubet2';   
+            }
+            else
+            {
+                this.cubeController[index].texturetype = 'Cubet';
+            }
             index++;
         }
     }
@@ -218,7 +229,7 @@ export default class Level1 extends Scene {
         }
     for(let x = 1; x <= 7; x++)
     if(this.cubeController[x].colstatus === true )
-        this.createwave(90);
+        this.createwave(50);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
@@ -240,7 +251,7 @@ export default class Level1 extends Scene {
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
             program.setUniform4f("tint", [1, 1, 1, 1]);
             this.gl.activeTexture(this.gl.TEXTURE3);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet']);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
             program.setUniform1i('texture_sampler', 3);
             this.gl.bindSampler(3, this.samplers['regular']);
 

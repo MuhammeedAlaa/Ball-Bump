@@ -8,6 +8,8 @@ export default class ObstacleController {
     Minpos: vec3;
     Maxpos: vec3;
     center: vec3;
+    texturetype: string; //The used texture on the cube
+
     constructor(v: vec3) {
         this.M = mat4.create();
         this.Step = 0.1;
