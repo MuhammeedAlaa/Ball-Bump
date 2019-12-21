@@ -8,6 +8,29 @@ import GroundController from '../common/Cotrollers/ground-controller';
 import { vec3, mat4, quat, vec4 } from 'gl-matrix';
 import ObstacleController from '../common/Cotrollers/obstacle-controller';
 
+// This is the data type that describes the solar system
+// It follows a tree like structure where every node defines a celestial object and its children if any
+interface SystemDescription {
+    playerscale: number,
+    groundscale: number,
+    cubescale: number,
+    startpostion: vec3, 
+    rotationSpeedAroundSelf: number, 
+    groundstartpostion: vec3,
+    goundmovespeed:number,
+    distanceofwave:number,
+    backgroundclor:vec4,
+    fogcolor:vec4,
+    fogdistance:number,
+    lightdirection:vec4,
+    lightcolor:vec4
+    ambientcolor:vec4,
+    tintplayer: vec4,
+    tintground:vec4,
+    tintcubes:vec4
+};
+
+
 // In this scene we will draw a scene to multiple targets then use the target to do post processing
 export default class Level1 extends Scene {
     programs: { [name: string]: ShaderProgram } = {};
@@ -19,9 +42,9 @@ export default class Level1 extends Scene {
     meshes: { [name: string]: Mesh } = {};
     textures: { [name: string]: WebGLTexture } = {};
     samplers: { [name: string]: WebGLSampler } = {};
+    systems: SystemDescription;
     frameBuffer: WebGLFramebuffer; // This will hold the frame buffer object
     cubeNumber: number;
-
     readonly shaders = [
         "light"
     ];
@@ -42,12 +65,14 @@ export default class Level1 extends Scene {
             ["Ground-texture"]: { url: 'images/Blue3.png', type: 'image'},
             ["cube-model"]:{url: 'models/Blue Cube/chr_phantom_puzzle.obj',type: 'text'},
             ["cube-texture"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD01.png',type:'image'},
-            ["cube-texture2"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',type:'image'}
+            ["cube-texture2"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',type:'image'},
+            ["systems"]:{url:'data/Level1.json', type:'json'}
         });
     }
 
     public start(): void {
         // This shader program will draw 3D objects
+        this.systems = this.game.loader.resources["systems"];
         this.programs["3d"] = new ShaderProgram(this.gl);
         this.programs["3d"].attach(this.game.loader.resources["mrt.vert"], this.gl.VERTEX_SHADER);
         this.programs["3d"].attach(this.game.loader.resources["mrt.frag"], this.gl.FRAGMENT_SHADER);
@@ -337,7 +362,7 @@ export default class Level1 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', 10);//4
+                    program.setUniform1f('fog_distance', 4);//4
                     program.setUniform4f('fog_color', [0.76,0.83,0.56, 1]);//3
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.fromValues(1,0,0);

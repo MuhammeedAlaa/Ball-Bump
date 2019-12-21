@@ -10264,8 +10264,9 @@ var ground_controller_1 = __importDefault(require("../common/Cotrollers/ground-c
 
 var gl_matrix_1 = require("gl-matrix");
 
-var obstacle_controller_1 = __importDefault(require("../common/Cotrollers/obstacle-controller")); // In this scene we will draw a scene to multiple targets then use the target to do post processing
+var obstacle_controller_1 = __importDefault(require("../common/Cotrollers/obstacle-controller"));
 
+; // In this scene we will draw a scene to multiple targets then use the target to do post processing
 
 var Level1 =
 /** @class */
@@ -10322,11 +10323,15 @@ function (_super) {
     }, _b["cube-texture2"] = {
       url: 'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',
       type: 'image'
+    }, _b["systems"] = {
+      url: 'data/Level1.json',
+      type: 'json'
     }, _b)));
   };
 
   Level1.prototype.start = function () {
     // This shader program will draw 3D objects
+    this.systems = this.game.loader.resources["systems"];
     this.programs["3d"] = new shader_program_1.default(this.gl);
     this.programs["3d"].attach(this.game.loader.resources["mrt.vert"], this.gl.VERTEX_SHADER);
     this.programs["3d"].attach(this.game.loader.resources["mrt.frag"], this.gl.FRAGMENT_SHADER);
@@ -10565,7 +10570,7 @@ function (_super) {
       this.gl.bindSampler(2, this.samplers['postprocess']);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
       program.setUniform1i('depth_sampler', 2);
-      program.setUniform1f('fog_distance', 10); //4
+      program.setUniform1f('fog_distance', 4); //4
 
       program.setUniform4f('fog_color', [0.76, 0.83, 0.56, 1]); //3
 
@@ -10680,7 +10685,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51614" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56749" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
