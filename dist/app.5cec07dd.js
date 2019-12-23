@@ -10075,17 +10075,17 @@ function () {
       if (this.input.isKeyDown("a")) movement[2] += deltaTime / 70;
       if (this.input.isKeyDown("d")) movement[2] -= deltaTime / 70;
 
-      if (this.M[14] < 14 && this.M[14] > -14) {
+      if (this.M[14] < 12 && this.M[14] > -12) {
         gl_matrix_1.mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
         gl_matrix_1.vec3.add(this.postion, this.postion, [movement[0], movement[1], movement[2]]);
       } else {
-        if (this.M[14] >= 14) {
+        if (this.M[14] >= 12) {
           if (this.input.isKeyDown("d")) {
             movement[2] -= deltaTime / 100;
             gl_matrix_1.mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
             gl_matrix_1.vec3.add(this.postion, this.postion, [movement[0], movement[1], movement[2]]);
           }
-        } else if (this.M[14] <= -14) {
+        } else if (this.M[14] <= -12) {
           if (this.input.isKeyDown("a")) {
             movement[2] += deltaTime / 100;
             gl_matrix_1.mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
@@ -10130,7 +10130,7 @@ function () {
       } else {
         this.act = this.Step;
         this.M = gl_matrix_1.mat4.create();
-        gl_matrix_1.mat4.scale(this.M, this.M, [100, 1, 15]);
+        gl_matrix_1.mat4.scale(this.M, this.M, [100, 1, 14]);
       }
     }
   };
@@ -10153,15 +10153,17 @@ var ObstacleController =
 function () {
   function ObstacleController(v) {
     this.M = gl_matrix_1.mat4.create();
-    this.Step = 0.1;
-    this.act = 0.1;
+    this.Step = 0.3; //0.1
+
+    this.act = 0.3; //0.1
+
     this.colstatus = false;
     this.Minpos = gl_matrix_1.vec3.create();
     this.Maxpos = gl_matrix_1.vec3.create();
     this.hold = 0;
     this.center = v;
     gl_matrix_1.vec3.add(this.Minpos, v, [1.142, 0, 1.142]);
-    gl_matrix_1.vec3.add(this.Maxpos, v, [1.142, 2.285, -1.142]);
+    gl_matrix_1.vec3.add(this.Maxpos, v, [-1.142, 2.285, -1.142]);
   }
 
   ObstacleController.prototype.update = function (deltaTime) {
@@ -10176,7 +10178,9 @@ function () {
         gl_matrix_1.vec3.add(this.Minpos, this.Minpos, [this.Step, 0, 0]);
         gl_matrix_1.vec3.add(this.Maxpos, this.Maxpos, [this.Step, 0, 0]);
       } else if (this.colstatus) {
-        gl_matrix_1.mat4.translate(this.M, this.M, [0, -15, 0]);
+        this.M = gl_matrix_1.mat4.create(); //mat4.scale(this.M,this.M,[3.33,3.33,3.33]);
+
+        gl_matrix_1.mat4.translate(this.M, this.M, [0, -10, 0]);
       }
     }
   };
@@ -10408,16 +10412,18 @@ function (_super) {
     this.gl.samplerParameteri(this.samplers['postprocess'], this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
     this.camera = new camera_1.default();
     this.camera.type = 'perspective';
-    this.camera.position = gl_matrix_1.vec3.fromValues(4, 14, 0);
-    this.camera.direction = gl_matrix_1.vec3.fromValues(-5, -9, 0);
+    this.camera.position = gl_matrix_1.vec3.fromValues(-9, 14, 0); //4
+
+    this.camera.direction = gl_matrix_1.vec3.fromValues(-5, -9, 0); //-9
+
     this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
     var PlayerMat = gl_matrix_1.mat4.create();
-    gl_matrix_1.mat4.translate(PlayerMat, PlayerMat, [0, 1, 0]);
+    gl_matrix_1.mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
     var tr = gl_matrix_1.vec3.create();
-    gl_matrix_1.vec3.add(tr, tr, [0, 1, 0]);
+    gl_matrix_1.vec3.add(tr, tr, [-9, 1, 0]);
     this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr);
     var groundMat = gl_matrix_1.mat4.create();
-    gl_matrix_1.mat4.scale(groundMat, groundMat, [100, 1, 15]);
+    gl_matrix_1.mat4.scale(groundMat, groundMat, [100, 1, 14]);
     this.groundcontroller = new ground_controller_1.default(groundMat, 0.002);
     this.createwave(50);
     this.gl.enable(this.gl.CULL_FACE);
@@ -10470,9 +10476,8 @@ function (_super) {
     for (var x = 1; x <= this.cubeNumber; x++) {
       if (this.cubeController[x].colstatus === false) {
         this.cubeController[x].colstatus = this.detcoll(this.cubeController[x]);
+        this.cubeController[x].update(deltaTime);
       }
-
-      this.cubeController[x].update(deltaTime);
     }
 
     for (var x = 1; x <= this.cubeNumber; x++) {
@@ -10487,7 +10492,7 @@ function (_super) {
         break;
       } else {
         for (var y = 1; y <= 7; y++) {
-          if (this.cubeController[y].colstatus === true && this.playercontroller.gre > 75) //5
+          if (this.cubeController[y].colstatus === true && this.playercontroller.gre > 30) //75 
             {
               for (var z = 1; z <= this.cubeNumber; z++) {
                 delete this.cubeController[z];
@@ -10505,7 +10510,8 @@ function (_super) {
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     {
       this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
-      this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67, 0.84, 0.9, 1]);
+      this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67, 0.84, 0.9, 1]); //0.67,0.84,0.9, 1
+
       this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
       this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
       this.gl.bindSampler(0, this.samplers['regular']);
@@ -10554,7 +10560,8 @@ function (_super) {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     {
-      this.gl.clearColor(0.08, 0.32, 0.44, 1);
+      this.gl.clearColor(0.08, 0.32, 0.44, 1); //0.08, 0.32, 0.44, 1
+
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
       var program = void 0;
       program = this.programs['light'];
@@ -10570,9 +10577,9 @@ function (_super) {
       this.gl.bindSampler(2, this.samplers['postprocess']);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
       program.setUniform1i('depth_sampler', 2);
-      program.setUniform1f('fog_distance', 4); //4
+      program.setUniform1f('fog_distance', 1); //4
 
-      program.setUniform4f('fog_color', [0.76, 0.83, 0.56, 1]); //3
+      program.setUniform4f('fog_color', [0.678, 0.847, 0.902, 1]); //3 0.76,0.83,0.56, 1
 
       program.setUniformMatrix4fv('P_i', false, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), this.camera.ProjectionMatrix));
       var light_direction = gl_matrix_1.vec3.fromValues(1, 0, 0);
@@ -10685,7 +10692,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56749" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62502" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

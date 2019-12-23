@@ -170,23 +170,23 @@ export default class Level1 extends Scene {
 
         this.camera = new Camera();
         this.camera.type = 'perspective';
-        this.camera.position = vec3.fromValues(4, 14, 0);
-        this.camera.direction = vec3.fromValues(-5, -9, 0);
+        this.camera.position = vec3.fromValues(-9, 14, 0);//4
+        this.camera.direction = vec3.fromValues(-5, -9, 0);//-9
         this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
 
 
         
         
         let PlayerMat = mat4.create();
-        mat4.translate(PlayerMat, PlayerMat, [0, 1, 0]);
+        mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
         let tr = vec3.create();
-        vec3.add(tr,tr,[0,1,0]);
+        vec3.add(tr,tr,[-9,1,0]);
         this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr);
 
 
                 
         let groundMat = mat4.create();
-        mat4.scale(groundMat, groundMat, [100, 1, 15]);
+        mat4.scale(groundMat, groundMat, [100, 1, 14]);
         this.groundcontroller = new GroundController(groundMat,0.002);  
         
 
@@ -206,25 +206,26 @@ export default class Level1 extends Scene {
         this.cubeNumber = 49;
         let index = 1;
             
-            for(let x = -12; x <= 12; x+=4)
-            for(let z = -12; z <= 12; z+=4){
+        for(let x = -12; x <= 12; x+=4)
+            for(let z = -12; z <= 12; z+=4)
+            {
                 let v = vec3.create();
                 vec3.add(v,v,[x-dis,0,z]);
-            this.cubeController[index] = new ObstacleController(v);
-            //Select the applied texture
-            let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
-            if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
-            {
-                this.cubeController[index].texturetype = 'Cubet2'; 
-                this.cubeController[index].color = 1;  
+                this.cubeController[index] = new ObstacleController(v);
+                //Select the applied texture
+                let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
+                if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
+                {
+                    this.cubeController[index].texturetype = 'Cubet2'; 
+                    this.cubeController[index].color = 1;  
+                }
+                else
+                {
+                    this.cubeController[index].texturetype = 'Cubet';
+                    this.cubeController[index].color = 0;
+                }
+                index++;
             }
-            else
-            {
-                this.cubeController[index].texturetype = 'Cubet';
-                this.cubeController[index].color = 0;
-            }
-            index++;
-        }
     }
 
     private detcoll(cubeController:ObstacleController): boolean{
@@ -250,57 +251,62 @@ export default class Level1 extends Scene {
             if(this.cubeController[x].colstatus === false)
             {
                 this.cubeController[x].colstatus= this.detcoll(this.cubeController[x]);
+                this.cubeController[x].update(deltaTime);
             }
             
-            this.cubeController[x].update(deltaTime);
+            
         }
-    for(let x = 1; x <= this.cubeNumber; x++)
-    if(this.cubeController[x].colstatus === true && this.cubeController[x].color === 1 )
-    {
-        this.playercontroller.die = 1;
-        this.groundcontroller.hold = 1;
-        for(let z = 1; z <= this.cubeNumber; z++)
-        this.cubeController[z].hold = 1;
-        break;
-        
-    }
-    else
-    {
-        for(let y = 1; y <= 7; y++)
-    if(this.cubeController[y].colstatus === true  && this.playercontroller.gre > 75)//5
-    {
-        for(let z = 1; z <= this.cubeNumber; z++)
-        delete this.cubeController[z]
-        this.playercontroller.gre = 0;
-        this.createwave(50);}//4
-    }
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
-        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-        {
-            this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
-            this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67,0.84,0.9, 1]);
-            this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
-            this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
+        for(let x = 1; x <= this.cubeNumber; x++)
+            if(this.cubeController[x].colstatus === true && this.cubeController[x].color === 1 )
+            {
+                this.playercontroller.die = 1;
+                this.groundcontroller.hold = 1;
+                for(let z = 1; z <= this.cubeNumber; z++)
+                this.cubeController[z].hold = 1;
+                break;
+                
+            }
+            else
+            {
+                for(let y = 1; y <= 7; y++)
+                if(this.cubeController[y].colstatus === true && this.playercontroller.gre > 30)//75 
+                {
+                    for(let z = 1; z <= this.cubeNumber; z++)
+                        {
+                            delete this.cubeController[z];
+                        }
+                    this.playercontroller.gre = 0;
+                    this.createwave(50);
+                }//4
+            }
 
-            this.gl.bindSampler(0, this.samplers['regular']);
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
+            this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+            {
+                this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
+                this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67,0.84,0.9, 1]);//0.67,0.84,0.9, 1
+                this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
+                this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
 
-            let program = this.programs['3d'];
-            program.use();
+                this.gl.bindSampler(0, this.samplers['regular']);
 
-            for(let x = 1; x <= this.cubeNumber; x++){
-            let MatCube = this.cubeController[x].M;
-            program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
-            program.setUniformMatrix4fv("M", false, MatCube);
-            program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
-            program.setUniform4f("tint", [1, 1, 1, 1]);
-           
-            this.gl.activeTexture(this.gl.TEXTURE3);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
-            program.setUniform1i('texture_sampler', 3);
-            this.gl.bindSampler(3, this.samplers['regular']);
+                let program = this.programs['3d'];
+                program.use();
 
-            this.meshes['Cube'].draw(this.gl.TRIANGLES);            
-        }
+                for(let x = 1; x <= this.cubeNumber; x++){
+                    let MatCube = this.cubeController[x].M;
+                    program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
+                    program.setUniformMatrix4fv("M", false, MatCube);
+                    program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
+                    program.setUniform4f("tint", [1, 1, 1, 1]);
+                
+                    this.gl.activeTexture(this.gl.TEXTURE3);
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
+                    program.setUniform1i('texture_sampler', 3);
+                    this.gl.bindSampler(3, this.samplers['regular']);
+
+                    this.meshes['Cube'].draw(this.gl.TRIANGLES);            
+            }
 
             program = this.programs['3d'];
             program.use();
@@ -341,7 +347,7 @@ export default class Level1 extends Scene {
 
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
         {
-            this.gl.clearColor(0.08, 0.32, 0.44, 1);
+            this.gl.clearColor(0.08, 0.32, 0.44, 1);//0.08, 0.32, 0.44, 1
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
             
@@ -362,14 +368,14 @@ export default class Level1 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', 4);//4
-                    program.setUniform4f('fog_color', [0.76,0.83,0.56, 1]);//3
+                    program.setUniform1f('fog_distance', 1);//4
+                    program.setUniform4f('fog_color', [0.678,0.847,0.902, 1]);//3 0.76,0.83,0.56, 1
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.fromValues(1,0,0);
                     vec3.normalize(light_direction, light_direction);
                     program.setUniform3f('light_direction', light_direction);
-                    program.setUniform4f('light_color', [1, 1, 1, 1]);//1
-                    program.setUniform4f('ambient_color', [0.1, 0.1, 0.1, 1]);//2
+                    program.setUniform4f('light_color', [1 ,1 ,1, 1]);//1
+                    program.setUniform4f('ambient_color', [0.1 , 0.1, 0.1, 1]);//2
                     this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
 
                 }

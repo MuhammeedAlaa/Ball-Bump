@@ -23,7 +23,7 @@ float fogAmount(float dist){
 
 void main(){
     vec3 normal = texture(normal_sampler, v_screencoord).xyz;
-    // This is just basic lambert lighting. We will explore it more in the next lab. 
+    // This is just basic lambert lighting. 
     float depth = texture(depth_sampler, v_screencoord).x; // read the depth from the depth texture
     vec4 inv_projected = P_i * vec4(2.0*v_screencoord.x-1.0, 2.0*v_screencoord.y-1.0, 2.0*depth-1.0, 1.0); // regenerate the NDC and multiply by projection inverse
     inv_projected = inv_projected / inv_projected.w; // Divide by w to get the point in view space

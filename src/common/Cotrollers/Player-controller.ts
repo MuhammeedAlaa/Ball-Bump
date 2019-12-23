@@ -25,19 +25,19 @@ export default class PlayerController {
             let movement = vec3.create();
             if (this.input.isKeyDown("a")) movement[2] += deltaTime / 70;
             if (this.input.isKeyDown("d")) movement[2] -= deltaTime / 70;
-            if (this.M[14] < 14 && this.M[14] > -14) {
+            if (this.M[14] < 12 && this.M[14] > -12) {
                 mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
                 vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
             }
             else {
-                if (this.M[14] >= 14) {
+                if (this.M[14] >= 12) {
                     if (this.input.isKeyDown("d")) {
                     movement[2] -= deltaTime / 100;
                         mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
                         vec3.add(this.postion,this.postion,[movement[0],movement[1],movement[2]]);
                     }
                 }
-                else if (this.M[14] <= -14) {
+                else if (this.M[14] <= -12) {
                     if (this.input.isKeyDown("a")) {
                     movement[2] += deltaTime / 100;
                         mat4.translate(this.M, this.M, [movement[0], movement[1], movement[2]]);
