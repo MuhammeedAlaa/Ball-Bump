@@ -10624,6 +10624,472 @@ function (_super) {
 }(game_1.Scene);
 
 exports.default = Level1;
+},{"../common/game":"src/common/game.ts","../common/shader-program":"src/common/shader-program.ts","../common/mesh-utils":"src/common/mesh-utils.ts","../common/camera":"src/common/camera.ts","../common/Cotrollers/Player-controller":"src/common/Cotrollers/Player-controller.ts","../common/Cotrollers/ground-controller":"src/common/Cotrollers/ground-controller.ts","gl-matrix":"node_modules/gl-matrix/esm/index.js","../common/Cotrollers/obstacle-controller":"src/common/Cotrollers/obstacle-controller.ts"}],"src/scenes/Level2.tsx":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (b.hasOwnProperty(p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+var __assign = this && this.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+
+      for (var p in s) {
+        if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+      }
+    }
+
+    return t;
+  };
+
+  return __assign.apply(this, arguments);
+};
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+var __importStar = this && this.__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) {
+    if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+  }
+  result["default"] = mod;
+  return result;
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var game_1 = require("../common/game");
+
+var shader_program_1 = __importDefault(require("../common/shader-program"));
+
+var MeshUtils = __importStar(require("../common/mesh-utils"));
+
+var camera_1 = __importDefault(require("../common/camera"));
+
+var Player_controller_1 = __importDefault(require("../common/Cotrollers/Player-controller"));
+
+var ground_controller_1 = __importDefault(require("../common/Cotrollers/ground-controller"));
+
+var gl_matrix_1 = require("gl-matrix");
+
+var obstacle_controller_1 = __importDefault(require("../common/Cotrollers/obstacle-controller"));
+
+; // In this scene we will draw a scene to multiple targets then use the target to do post processing
+
+var Level1 =
+/** @class */
+function (_super) {
+  __extends(Level1, _super);
+
+  function Level1() {
+    var _this = _super !== null && _super.apply(this, arguments) || this;
+
+    _this.programs = {};
+    _this.cubeController = {};
+    _this.meshes = {};
+    _this.textures = {};
+    _this.samplers = {};
+    _this.shaders = ["light"];
+    _this.cubeN = [70, 49, 21, 35];
+    _this.x_cubes = [-29, -12, -12, -22];
+    _this.x_end = [29, 12, 12, 22];
+    _this.inc_x = [4, 4, 4, 4];
+    return _this;
+  }
+
+  Level1.prototype.load = function () {
+    var _a, _b;
+
+    this.game.loader.load(__assign(__assign((_a = {}, _a["mrt.vert"] = {
+      url: 'shaders/mrt.vert',
+      type: 'text'
+    }, _a["mrt.frag"] = {
+      url: 'shaders/mrt.frag',
+      type: 'text'
+    }, _a["color.vert"] = {
+      url: 'shaders/color.vert',
+      type: 'text'
+    }, _a["color.frag"] = {
+      url: 'shaders/color.frag',
+      type: 'text'
+    }, _a["fullscreen.vert"] = {
+      url: 'shaders/post-process/fullscreen.vert',
+      type: 'text'
+    }, _a), Object.fromEntries(this.shaders.map(function (s) {
+      return [s + ".frag", {
+        url: "shaders/post-process/" + s + ".frag",
+        type: 'text'
+      }];
+    }))), (_b = {}, _b["Ball-texture"] = {
+      url: 'images/earth.jpg',
+      type: 'image'
+    }, _b["Ground-texture"] = {
+      url: 'images/dark.png',
+      type: 'image'
+    }, _b["Background-texture"] = {
+      url: 'images/galaxy.jpg',
+      type: 'image'
+    }, _b["cube-model"] = {
+      url: 'models/Blue Cube/chr_phantom_puzzle.obj',
+      type: 'text'
+    }, _b["cube-texture"] = {
+      url: 'models/Blue Cube/mlt_chr_pha_puz_dif_SD01.png',
+      type: 'image'
+    }, _b["cube-texture2"] = {
+      url: 'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',
+      type: 'image'
+    }, _b["systems"] = {
+      url: 'data/Level1.json',
+      type: 'json'
+    }, _b)));
+  };
+
+  Level1.prototype.start = function () {
+    // This shader program will draw 3D objects
+    this.systems = this.game.loader.resources["systems"];
+    this.programs["3d"] = new shader_program_1.default(this.gl);
+    this.programs["3d"].attach(this.game.loader.resources["mrt.vert"], this.gl.VERTEX_SHADER);
+    this.programs["3d"].attach(this.game.loader.resources["mrt.frag"], this.gl.FRAGMENT_SHADER);
+    this.programs["3d"].link(); // These shader programs will render post processing effects.
+
+    for (var _i = 0, _a = this.shaders; _i < _a.length; _i++) {
+      var shader = _a[_i];
+      this.programs[shader] = new shader_program_1.default(this.gl);
+      this.programs[shader].attach(this.game.loader.resources["fullscreen.vert"], this.gl.VERTEX_SHADER);
+      this.programs[shader].attach(this.game.loader.resources[shader + ".frag"], this.gl.FRAGMENT_SHADER);
+      this.programs[shader].link();
+    }
+
+    this.meshes['Ball'] = MeshUtils.Sphere(this.gl);
+    this.meshes['Ground'] = MeshUtils.Plane(this.gl, {
+      min: [0, 0],
+      max: [1, 1]
+    });
+    this.meshes['Background'] = MeshUtils.Plane(this.gl, {
+      min: [0, 0],
+      max: [1, 1]
+    });
+    this.meshes['Cube'] = MeshUtils.LoadOBJMesh(this.gl, this.game.loader.resources["cube-model"]);
+    this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true); //Loading the ball textures
+
+    this.textures['Ball'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ball']);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['Ball-texture']);
+    this.gl.generateMipmap(this.gl.TEXTURE_2D); //Loading the background textures
+
+    this.textures['Background'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Background']);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['Background-texture']);
+    this.gl.generateMipmap(this.gl.TEXTURE_2D); //Loading the ground textures
+
+    this.textures['Ground'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['Ground-texture']);
+    this.gl.generateMipmap(this.gl.TEXTURE_2D); //Loading the Cube textures
+
+    this.textures['Cubet'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet']);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['cube-texture']);
+    this.gl.generateMipmap(this.gl.TEXTURE_2D);
+    this.textures['Cubet2'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Cubet2']);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 4);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.game.loader.resources['cube-texture2']);
+    this.gl.generateMipmap(this.gl.TEXTURE_2D); // We will use the multi render target setup described in the previous scene
+
+    this.textures['color-target'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['color-target']);
+    this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, this.gl.RGBA8, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    this.gl.getExtension('EXT_color_buffer_float');
+    this.textures['normal-target'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['normal-target']);
+    this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, this.gl.RGBA32F, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    this.textures['depth-target'] = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
+    this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, this.gl.DEPTH_COMPONENT32F, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    this.frameBuffer = this.gl.createFramebuffer();
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
+    this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.textures['color-target'], 0);
+    this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT1, this.gl.TEXTURE_2D, this.textures['normal-target'], 0);
+    this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.textures['depth-target'], 0);
+    var status = this.gl.checkFramebufferStatus(this.gl.FRAMEBUFFER);
+
+    if (status != this.gl.FRAMEBUFFER_COMPLETE) {
+      if (status == this.gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) console.error("The framebuffer has a type mismatch");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) console.error("The framebuffer is missing an attachment");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS) console.error("The framebuffer has dimension mismatch");else if (status == this.gl.FRAMEBUFFER_UNSUPPORTED) console.error("The framebuffer has an attachment with unsupported format");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) console.error("The framebuffer has multisample mismatch");else console.error("The framebuffer has an unknown error");
+    }
+
+    this.samplers['regular'] = this.gl.createSampler();
+    this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+    this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+    this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+    this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+    this.samplers['postprocess'] = this.gl.createSampler();
+    this.gl.samplerParameteri(this.samplers['postprocess'], this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.samplerParameteri(this.samplers['postprocess'], this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+    this.gl.samplerParameteri(this.samplers['postprocess'], this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+    this.gl.samplerParameteri(this.samplers['postprocess'], this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+    this.camera = new camera_1.default();
+    this.camera.type = 'perspective';
+    this.camera.position = gl_matrix_1.vec3.fromValues(-9, 14, 0); //4
+
+    this.camera.direction = gl_matrix_1.vec3.fromValues(-5, -9, 0); //-9
+
+    this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
+    var PlayerMat = gl_matrix_1.mat4.create();
+    gl_matrix_1.mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
+    var tr = gl_matrix_1.vec3.create();
+    gl_matrix_1.vec3.add(tr, tr, [-9, 1, 0]);
+    this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr);
+    var backgroundMat = gl_matrix_1.mat4.create();
+    var groundMat = gl_matrix_1.mat4.create();
+    gl_matrix_1.mat4.scale(groundMat, groundMat, [100, 1, 14]);
+    this.groundcontroller = new ground_controller_1.default(groundMat, 0.002);
+    this.createwave(50);
+    this.gl.enable(this.gl.CULL_FACE);
+    this.gl.cullFace(this.gl.BACK);
+    this.gl.frontFace(this.gl.CCW);
+    this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.depthFunc(this.gl.LEQUAL);
+  };
+
+  Level1.prototype.createwave = function (dis) {
+    var random = Math.floor(Math.random() * 4) + 1; //Get a random number from 1 to 3
+
+    random = random - 1;
+    this.cubeNumber = this.cubeN[random]; // this.cubeNumber = 21;
+
+    var index = 1;
+
+    for (var x = this.x_cubes[random]; x <= this.x_end[random]; x += this.inc_x[random]) {
+      for (var z = -12; z <= 12; z += 4) {
+        var v = gl_matrix_1.vec3.create();
+        gl_matrix_1.vec3.add(v, v, [x - dis, 0, z]);
+        this.cubeController[index] = new obstacle_controller_1.default(v); //Select the applied texture
+
+        var randomNumber = Math.floor(Math.random() * 6) + 1; //Get a random number from 1 to 6
+
+        if ((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0) {
+          this.cubeController[index].texturetype = 'Cubet2';
+          this.cubeController[index].color = 1;
+        } else {
+          this.cubeController[index].texturetype = 'Cubet';
+          this.cubeController[index].color = 0;
+        }
+
+        index++;
+      }
+    }
+  };
+
+  Level1.prototype.detcoll = function (cubeController) {
+    var center = this.playercontroller.postion;
+    var bmin = cubeController.Minpos;
+    var bmax = cubeController.Maxpos;
+    var x = Math.max(bmin[0], Math.min(center[0], bmax[0]));
+    var y = Math.max(bmin[1], Math.min(center[1], bmax[1]));
+    var z = Math.max(bmin[2], Math.min(center[2], bmax[2]));
+    var distance = Math.sqrt((x - center[0]) * (x - center[0]) + (y - center[1]) * (y - center[1]) + (z - center[2]) * (z - center[2]));
+    return distance < 2;
+  };
+
+  Level1.prototype.draw = function (deltaTime, time) {
+    this.playercontroller.update(deltaTime);
+    this.groundcontroller.update();
+
+    for (var x = 1; x <= this.cubeNumber; x++) {
+      if (this.cubeController[x].colstatus === false) {
+        this.cubeController[x].colstatus = this.detcoll(this.cubeController[x]);
+        this.cubeController[x].update(deltaTime);
+      }
+    }
+
+    for (var x = 1; x <= this.cubeNumber; x++) {
+      if (this.cubeController[x].colstatus === true && this.cubeController[x].color === 1) {
+        this.playercontroller.die = 1;
+        this.groundcontroller.hold = 1;
+
+        for (var z = 1; z <= this.cubeNumber; z++) {
+          this.cubeController[z].hold = 1;
+        }
+
+        break;
+      } else {
+        for (var y = 1; y <= 7; y++) {
+          if (this.cubeController[y].colstatus === true && this.playercontroller.gre > 30) //75 
+            {
+              for (var z = 1; z <= this.cubeNumber; z++) {
+                delete this.cubeController[z];
+              }
+
+              this.playercontroller.gre = 0;
+              this.createwave(50);
+            }
+        }
+      }
+    }
+
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBuffer);
+    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    {
+      this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
+      this.gl.clearBufferfv(this.gl.COLOR, 0, [0.67, 0.84, 0.9, 1]);
+      this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
+      this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
+      this.gl.bindSampler(0, this.samplers['regular']);
+      var program = this.programs['3d'];
+      program.use();
+
+      for (var x = 1; x <= this.cubeNumber; x++) {
+        var MatCube = this.cubeController[x].M;
+        program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
+        program.setUniformMatrix4fv("M", false, MatCube);
+        program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), MatCube));
+        program.setUniform4f("tint", [1, 1, 1, 1]);
+        this.gl.activeTexture(this.gl.TEXTURE3);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
+        program.setUniform1i('texture_sampler', 3);
+        this.gl.bindSampler(3, this.samplers['regular']);
+        this.meshes['Cube'].draw(this.gl.TRIANGLES);
+      }
+
+      program = this.programs['3d'];
+      program.use();
+      program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
+      var backgroundMat = gl_matrix_1.mat4.create();
+      gl_matrix_1.mat4.translate(backgroundMat, backgroundMat, [-10, -0.1, 0]);
+      gl_matrix_1.mat4.scale(backgroundMat, backgroundMat, [540, 1, 960]);
+      program.setUniformMatrix4fv("M", false, backgroundMat);
+      program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), backgroundMat));
+      program.setUniform4f("tint", [1, 1, 1, 1]);
+      this.gl.activeTexture(this.gl.TEXTURE0);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Background']);
+      program.setUniform1i('texture_sampler', 0);
+      this.gl.bindSampler(0, this.samplers['regular']);
+      this.meshes['Background'].draw(this.gl.TRIANGLES);
+      var groundMat = this.groundcontroller.M;
+      program.setUniformMatrix4fv("M", false, groundMat);
+      program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), groundMat));
+      program.setUniform4f("tint", [0.96, 0.91, 0.64, 1]);
+      this.gl.activeTexture(this.gl.TEXTURE0);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
+      program.setUniform1i('texture_sampler', 0);
+      this.gl.bindSampler(0, this.samplers['regular']);
+      this.meshes['Ground'].draw(this.gl.TRIANGLES);
+      program.setUniformMatrix4fv("M", false, this.playercontroller.M);
+      program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), this.playercontroller.M));
+
+      if (this.playercontroller.die === 0) {
+        program.setUniform4f("tint", [1, 1, 1, 1]);
+      } else {
+        program.setUniform4f("tint", [1, (Math.abs(Math.sin(time * 1000)) + 0.5) / 2 + 0.2, (Math.abs(Math.sin(time * 50)) + 0.2) / 2 + 0.5, 1]);
+      }
+
+      this.gl.activeTexture(this.gl.TEXTURE0);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ball']);
+      program.setUniform1i('texture_sampler', 0);
+      this.meshes['Ball'].draw(this.gl.TRIANGLES);
+    }
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    {
+      this.gl.clearColor(0.08, 0.32, 0.44, 1);
+      this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+      var program = void 0;
+      program = this.programs['light'];
+      program.use();
+      this.gl.activeTexture(this.gl.TEXTURE0);
+      this.gl.bindSampler(0, this.samplers['postprocess']);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['color-target']);
+      program.setUniform1i('color_sampler', 0);
+      this.gl.activeTexture(this.gl.TEXTURE1);
+      this.gl.bindSampler(1, this.samplers['postprocess']);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['normal-target']);
+      program.setUniform1i('normal_sampler', 1);
+      this.gl.bindSampler(2, this.samplers['postprocess']);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
+      program.setUniform1i('depth_sampler', 2);
+      program.setUniform1f('fog_distance', 4); //4
+
+      program.setUniform4f('fog_color', [0.678, 0.847, 0.902, 1]); //3 0.76,0.83,0.56, 1
+
+      program.setUniformMatrix4fv('P_i', false, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), this.camera.ProjectionMatrix));
+      var light_direction = gl_matrix_1.vec3.fromValues(1, 0, 0);
+      gl_matrix_1.vec3.normalize(light_direction, light_direction);
+      program.setUniform3f('light_direction', light_direction);
+      program.setUniform4f('light_color', [1, 1, 1, 1]); //1
+
+      program.setUniform4f('ambient_color', [0.1, 0.1, 0.1, 1]); //2
+
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
+    }
+  };
+
+  Level1.prototype.end = function () {
+    for (var key in this.programs) {
+      this.programs[key].dispose();
+    }
+
+    this.programs = {};
+
+    for (var key in this.meshes) {
+      this.meshes[key].dispose();
+    }
+
+    this.meshes = {};
+    this.gl.deleteFramebuffer(this.frameBuffer);
+
+    for (var key in this.textures) {
+      this.gl.deleteTexture(this.textures[key]);
+    }
+
+    this.textures = {};
+    this.clearControls();
+  };
+
+  Level1.prototype.clearControls = function () {
+    var controls = document.querySelector('#controls');
+    controls.innerHTML = "";
+  };
+
+  return Level1;
+}(game_1.Scene);
+
+exports.default = Level1;
 },{"../common/game":"src/common/game.ts","../common/shader-program":"src/common/shader-program.ts","../common/mesh-utils":"src/common/mesh-utils.ts","../common/camera":"src/common/camera.ts","../common/Cotrollers/Player-controller":"src/common/Cotrollers/Player-controller.ts","../common/Cotrollers/ground-controller":"src/common/Cotrollers/ground-controller.ts","gl-matrix":"node_modules/gl-matrix/esm/index.js","../common/Cotrollers/obstacle-controller":"src/common/Cotrollers/obstacle-controller.ts"}],"src/app.ts":[function(require,module,exports) {
 "use strict";
 
@@ -10639,7 +11105,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var game_1 = __importDefault(require("./common/game"));
 
-var Level1_1 = __importDefault(require("./scenes/Level1")); // First thing we need is to get the canvas on which we draw our scenes
+var Level1_1 = __importDefault(require("./scenes/Level1"));
+
+var Level2_1 = __importDefault(require("./scenes/Level2")); // First thing we need is to get the canvas on which we draw our scenes
 
 
 var canvas = document.querySelector("#app"); // Then we create an instance of the game class and give it the canvas
@@ -10647,7 +11115,8 @@ var canvas = document.querySelector("#app"); // Then we create an instance of th
 var game = new game_1.default(canvas); // Here we list all our scenes and our initial scene
 
 var scenes = {
-  "Level1": Level1_1.default
+  "Level1": Level1_1.default,
+  "Level2": Level2_1.default
 };
 var initialScene = "Level1"; // Then we add those scenes to the game object and ask it to start the initial scene
 
@@ -10664,7 +11133,10 @@ for (var name in scenes) {
 }
 
 selector.value = initialScene;
-},{"./common/game":"src/common/game.ts","./scenes/Level1":"src/scenes/Level1.tsx"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+selector.addEventListener("change", function () {
+  game.startScene(selector.value);
+});
+},{"./common/game":"src/common/game.ts","./scenes/Level1":"src/scenes/Level1.tsx","./scenes/Level2":"src/scenes/Level2.tsx"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -10692,7 +11164,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62502" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54258" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

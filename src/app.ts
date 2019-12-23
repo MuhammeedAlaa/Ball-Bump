@@ -1,6 +1,7 @@
 // Here, we import the things we need from other script files 
 import Game from './common/game';
 import Level1 from './scenes/Level1';
+import Level2 from './scenes/Level2';
 
 // First thing we need is to get the canvas on which we draw our scenes
 const canvas: HTMLCanvasElement = document.querySelector("#app");
@@ -11,6 +12,7 @@ const game = new Game(canvas);
 // Here we list all our scenes and our initial scene
 const scenes = {
     "Level1": Level1,
+    "Level2":Level2,
 };
 const initialScene = "Level1";
  
@@ -29,3 +31,6 @@ for(let name in scenes){
     selector.add(option);
 }
 selector.value = initialScene;
+selector.addEventListener("change", ()=>{
+    game.startScene(selector.value);
+});
