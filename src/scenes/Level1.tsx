@@ -53,8 +53,6 @@ export default class level1 extends Scene {
         this.game.loader.load({
             ["mrt.vert"]: { url: 'shaders/mrt.vert', type: 'text' },
             ["mrt.frag"]: { url: 'shaders/mrt.frag', type: 'text' },
-            ["color.vert"]:{url:'shaders/color.vert', type:'text'},
-            ["color.frag"]:{url:'shaders/color.frag', type:'text'},
             ["fullscreen.vert"]: { url: 'shaders/post-process/fullscreen.vert', type: 'text' },
             ...Object.fromEntries(this.shaders.map((s) => [`${s}.frag`, { url: `shaders/post-process/${s}.frag`, type: 'text' }])),
             ["Ball-texture"]: { url: 'images/earth.jpg', type: 'image' },

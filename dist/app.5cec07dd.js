@@ -10335,12 +10335,6 @@ function (_super) {
     }, _a["mrt.frag"] = {
       url: 'shaders/mrt.frag',
       type: 'text'
-    }, _a["color.vert"] = {
-      url: 'shaders/color.vert',
-      type: 'text'
-    }, _a["color.frag"] = {
-      url: 'shaders/color.frag',
-      type: 'text'
     }, _a["fullscreen.vert"] = {
       url: 'shaders/post-process/fullscreen.vert',
       type: 'text'
@@ -10815,12 +10809,6 @@ function (_super) {
     }, _a["mrt.frag"] = {
       url: 'shaders/mrt.frag',
       type: 'text'
-    }, _a["color.vert"] = {
-      url: 'shaders/color.vert',
-      type: 'text'
-    }, _a["color.frag"] = {
-      url: 'shaders/color.frag',
-      type: 'text'
     }, _a["fullscreen.vert"] = {
       url: 'shaders/post-process/fullscreen.vert',
       type: 'text'
@@ -11265,7 +11253,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63581" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63921" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
