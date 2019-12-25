@@ -11,13 +11,15 @@ export default class ObstacleController {
     texturetype: string; //The used texture on the cube
     color:number;
     hold:number;
+    scale:number;
 
-    constructor(v: vec3) {
+    constructor(v: vec3, scale:number, stp:number) {
         this.M = mat4.create();
-        this.Step = 0.3; //0.1
-        this.act = 0.3; //0.1
+        this.Step = stp; //0.1
+        this.act = stp; //0.1
         this.colstatus = false;
-        
+        this.scale = scale;
+
         this.Minpos = vec3.create();
         this.Maxpos = vec3.create();
         this.hold = 0;
@@ -35,7 +37,7 @@ export default class ObstacleController {
                 
                 mat4.translate(this.M, this.M, [this.act, 0, 0] );
                 mat4.translate(this.M, this.M, this.center );
-                mat4.scale(this.M, this.M, [0.3, 0.3, 0.3]);
+                mat4.scale(this.M, this.M, [this.scale, this.scale, this.scale]);
                 mat4.rotateY(this.M,this.M,Math.PI/2)
                 this.act += this.Step;
                 vec3.add(this.Minpos,this.Minpos,[this.Step,0,0]);

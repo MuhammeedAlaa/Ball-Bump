@@ -30,6 +30,5 @@ void main(){
     float fog_amount = fogAmount(length(inv_projected)); // get fog amount based the distance between the pixel and the camera
     color = texture(color_sampler, v_screencoord) * (max(0.0, dot(normal, light_direction))*light_color + ambient_color);
     color = mix(color, fog_color, fog_amount); // interpolate between the pixel color and fog color
-    
 
 }

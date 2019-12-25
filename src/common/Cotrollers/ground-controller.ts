@@ -4,8 +4,10 @@ export default class GroundController {
     M: mat4;
     act: number;
     hold: number;
-    constructor(M: mat4, Step: number){
+    scale:Array<number>;
+    constructor(M: mat4, Step: number, scale:Array<number>){
         this.M = M;
+        this.scale = scale;
         this.Step = Step;
         this.act = Step;
         this.hold = 0; 
@@ -22,7 +24,7 @@ export default class GroundController {
             {
              this.act = this.Step;
              this.M = mat4.create();
-             mat4.scale(this.M, this.M, [100, 1, 14]);
+             mat4.scale(this.M, this.M, [...this.scale]);
             } 
         }
     }

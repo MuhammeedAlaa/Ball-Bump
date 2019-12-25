@@ -23,13 +23,12 @@ float fogAmount(float dist){
 
 void main(){
     vec3 normal = texture(normal_sampler, v_screencoord).xyz;
-    // This is just basic lambert lighting. 
+    // This is just basic lambert lighting. We will explore it more in the next lab. 
     float depth = texture(depth_sampler, v_screencoord).x; // read the depth from the depth texture
     vec4 inv_projected = P_i * vec4(2.0*v_screencoord.x-1.0, 2.0*v_screencoord.y-1.0, 2.0*depth-1.0, 1.0); // regenerate the NDC and multiply by projection inverse
     inv_projected = inv_projected / inv_projected.w; // Divide by w to get the point in view space
     float fog_amount = fogAmount(length(inv_projected)); // get fog amount based the distance between the pixel and the camera
     color = texture(color_sampler, v_screencoord) * (max(0.0, dot(normal, light_direction))*light_color + ambient_color);
     color = mix(color, fog_color, fog_amount); // interpolate between the pixel color and fog color
-    
 
 }

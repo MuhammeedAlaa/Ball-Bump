@@ -5,21 +5,26 @@ import { delay } from 'q';
 //This is the abstract base of all scenes
 export abstract class Scene {
     game: Game;
+    contxt: CanvasRenderingContext2D;
     gl: WebGL2RenderingContext;
     public constructor(game: Game){
         this.game = game;
         this.gl = game.gl;
+        this.contxt = game.contxt;
     }
 
     public abstract load(): void; // Here we will tell the loader which files to load from the webserver
     public abstract start(): void; // Here we will initialize the scene objects before entering the draw loop 
     public abstract draw(deltaTime: number,time: number): void; // Here will draw the scene (deltaTime is the difference in time between this frame and the past frame in milliseconds)
     public abstract end(): void; // Here we free the memory from objects we allocated
+    public abstract draw2(time:number): void;
 }
 
 //This class create the WebGL2 context, manages the scenes and handles the game loop
 export default class Game {
     canvas: HTMLCanvasElement; // The canvas on which we will draw
+    score:HTMLCanvasElement;
+    contxt: CanvasRenderingContext2D;
     gl: WebGL2RenderingContext; // The WebGL2 context of the canvas (we will use it to draw)
     loader: Loader = new Loader(); // A loader to read files from the webserver
     input: Input; // A manager for user input (keyboard and mouse)
@@ -28,9 +33,11 @@ export default class Game {
     nextScene: Scene = null; // The scene that will replace the current scene after its files have been loaded
     nextSceneReady: boolean = false; // Whether the files requested by the next scene has been loaded or not 
     lastTick: number; // The time of the last frame in milliseconds (used to calculate delta time)
+    scoree: number;
 
-    constructor(canvas: HTMLCanvasElement){
+    constructor(canvas: HTMLCanvasElement, score:HTMLCanvasElement){
         this.canvas = canvas;
+        this.score = score;
         this.gl = this.canvas.getContext("webgl2", {
             preserveDrawingBuffer: true, // This will prevent the Browser from automatically clearing the frame buffer every frame
             alpha: true, // this will tell the browser that we want an alpha component in our frame buffer
@@ -40,6 +47,10 @@ export default class Game {
             premultipliedAlpha: false, // This can be used if the canvas are going to be blended with the rest of the webpage (transparency)
             stencil: true // this will tell the browser that we want a stencil buffer
         }); // This command loads the WebGL2 context which we will use to draw
+
+        this.scoree = 0;
+        this.contxt = this.score.getContext('2d');
+
         this.input = new Input(this.canvas);
         this.lastTick = performance.now();
         this.loop(performance.now()); // Start the game loop
@@ -73,6 +84,7 @@ export default class Game {
             this.currentScene.start(); // Tell the scene to initialize its objects
         }
         if(this.currentScene != null){
+            this.scoree += Math.round((time - this.lastTick)/10);
             this.currentScene.draw(time-this.lastTick,time); // Tell the scene to draw itself
         }
         this.input.update(); // Update some information about the user input

@@ -1,13 +1,12 @@
 {
     "scene": {
     "playerscale": 1,
-    "groundscale": [100,1,15],
-    "cubescale": 0.3,
-    "startpostionplayer": [0,1,0], 
-    "rotationSpeedAroundSelf": 1, 
-    "goundmovespeed":0.002,
+    "groundscale": [100,1,20],
+    "cubescale": 0.4,
+    "goundmovespeed":0.001,
     "distanceofwave":50,
-    "backgroundclor":[0.67,0.84,0.9, 1],
+    "goundobesdestance":0.1,
+    "backgroundcolor":[0.67,0.84,0.9, 1],
     "fogcolor":[0.76,0.83,0.56, 1],
     "fogdistance":4,
     "lightdirection":[1,0,0],
