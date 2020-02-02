@@ -17,6 +17,7 @@ interface SystemDescription {
     cubescale: number,
     goundmovespeed:number,
     distanceofwave:number,
+    wavestep:number,
     backgroundcolor:Array<number>,
     fogcolor:Array<number>,
     fogdistance:number,
@@ -27,7 +28,6 @@ interface SystemDescription {
     tintground:Array<number>,
     tintcubes:Array<number>
 };
-
 
 // In this scene we will draw a scene to multiple targets then use the target to do post processing
 export default class Level2 extends Scene {
@@ -48,6 +48,8 @@ export default class Level2 extends Scene {
     x_cubes:number[]=[-29,-12,-12,-22];
     x_end:number[]=[29,12,12,22];
     inc_x:number[]=[4,4,4,4];
+    fogdis: number;
+    disss: number;
 
 
     public load(): void {
@@ -158,6 +160,11 @@ export default class Level2 extends Scene {
             else
                 console.error("The framebuffer has an unknown error");
         }
+
+        this.fogdis = this.systems['scene'].fogdistance;
+        
+        
+        this.disss = 10000;      
      
         
 
@@ -195,7 +202,7 @@ export default class Level2 extends Scene {
         
 
 
-        this.createwave(this.systems["scene2"].distanceofwave);
+        this.createwave(this.systems["scene"].distanceofwave);
         
 
       
@@ -228,7 +235,7 @@ export default class Level2 extends Scene {
             {
                 let v = vec3.create();
                 vec3.add(v,v,[x-dis,0,z]);
-                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].goundmovespeed);
+                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].wavestep);
                 //Select the applied texture
                 let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
                 if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
@@ -301,14 +308,14 @@ export default class Level2 extends Scene {
             else
             {
                 for(let y = 1; y <= 7; y++)
-                if(this.playercontroller.gre > this.systems['scene'].distanceofwave + 50)//controls the distance i have to walk in the scene to generate another wave
+                if(this.playercontroller.gre > 0.2)//controls the distance i have to walk in the scene to generate another wave
                 {
                     for(let z = 1; z <= this.cubeNumber; z++)
                         {
                             delete this.cubeController[z];
                         }
                     this.playercontroller.gre = 0;
-                    this.createwave(this.systems["scene2"].distanceofwave);
+                    this.createwave(this.systems["scene"].distanceofwave);
                 }//4
             }
             
@@ -424,7 +431,23 @@ export default class Level2 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', this.systems["scene"].fogdistance);//4
+
+
+                          
+                    if(this.fogdis > 15){
+                        if(this.fogdis > 20){
+                            if(this.game.scoree > this.disss){
+                                this.fogdis -= 20;
+                                this.disss *= 2;
+                                console.log(this.fogdis);
+                                
+                            } 
+                        }
+                     } else {
+                            this.fogdis -= 5;
+                        }
+                        
+                    program.setUniform1f('fog_distance', this.fogdis);//4
                     program.setUniform4f('fog_color', [...this.systems["scene"].fogcolor]);//3 0.76,0.83,0.56, 1
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.create();
