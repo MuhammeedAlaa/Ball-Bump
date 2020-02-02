@@ -15,7 +15,6 @@ interface SystemDescription {
     playerscale: number,
     groundscale: Array<number>,
     cubescale: number,
-    step:number,
     goundmovespeed:number,
     distanceofwave:number,
     backgroundcolor:Array<number>,
@@ -29,6 +28,7 @@ interface SystemDescription {
     tintcubes:Array<number>
 };
 
+
 // In this scene we will draw a scene to multiple targets then use the target to do post processing
 export default class Level2 extends Scene {
     programs: { [name: string]: ShaderProgram } = {};
@@ -40,7 +40,7 @@ export default class Level2 extends Scene {
     meshes: { [name: string]: Mesh } = {};
     textures: { [name: string]: WebGLTexture } = {};
     samplers: { [name: string]: WebGLSampler } = {};
-    systems: SystemDescription;
+    systems: {[name:string]:SystemDescription};
     frameBuffer: WebGLFramebuffer; // This will hold the frame buffer object
    cubeNumber: number;
     readonly shaders = [ "light"];
@@ -62,7 +62,7 @@ export default class Level2 extends Scene {
             ["cube-model"]:{url: 'models/Blue Cube/chr_phantom_puzzle.obj',type: 'text'},
             ["cube-texture"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD01.png',type:'image'},
             ["cube-texture2"]:{url:'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',type:'image'},
-            ["systems"]:{url:'data/Level.json', type:'json'}
+            ["systems"]:{url:'data/Level1.json', type:'json'}
         });
     }
 
@@ -185,13 +185,13 @@ export default class Level2 extends Scene {
         mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
         let tr = vec3.create();
         vec3.add(tr,tr,[-9,1,0]);
-        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene2"].groundscale[2] - 1, this.systems['scene'].step);
+        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene"].groundscale[2] - 1, this.systems["scene"].goundmovespeed);
 
 
                 
         let groundMat = mat4.create();
-        mat4.scale(groundMat, groundMat, [...this.systems["scene2"].groundscale]);
-        this.groundcontroller = new GroundController(groundMat,this.systems["scene2"].goundmovespeed, [...this.systems["scene2"].groundscale]);  
+        mat4.scale(groundMat, groundMat, [...this.systems["scene"].groundscale]);
+        this.groundcontroller = new GroundController(groundMat,this.systems["scene"].goundmovespeed, [...this.systems["scene"].groundscale]);  
         
 
 
@@ -228,7 +228,7 @@ export default class Level2 extends Scene {
             {
                 let v = vec3.create();
                 vec3.add(v,v,[x-dis,0,z]);
-                this.cubeController[index] = new ObstacleController(v ,this.systems["scene2"].cubescale, this.systems["scene2"].step);
+                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].goundmovespeed);
                 //Select the applied texture
                 let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
                 if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
@@ -320,7 +320,7 @@ export default class Level2 extends Scene {
             this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
             {
                 this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
-                this.gl.clearBufferfv(this.gl.COLOR, 0, [...this.systems["scene2"].backgroundcolor]);//0.67,0.84,0.9, 1
+                this.gl.clearBufferfv(this.gl.COLOR, 0, [...this.systems["scene"].backgroundcolor]);//0.67,0.84,0.9, 1
                 this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
                 this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
                 this.gl.bindSampler(0, this.samplers['regular']);
@@ -334,7 +334,7 @@ export default class Level2 extends Scene {
                     program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
                     program.setUniformMatrix4fv("M", false, MatCube);
                     program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), MatCube));
-                    program.setUniform4f("tint", [...this.systems["scene2"].tintcubes]);
+                    program.setUniform4f("tint", [...this.systems["scene"].tintcubes]);
                 
                     this.gl.activeTexture(this.gl.TEXTURE3);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
@@ -359,7 +359,7 @@ export default class Level2 extends Scene {
             
             program.setUniformMatrix4fv("M", false, backgroundMat);
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(),backgroundMat));
-            program.setUniform4f("tint", [...this.systems["scene2"].tintground]);
+            program.setUniform4f("tint", [...this.systems["scene"].tintground]);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Background']);
@@ -371,7 +371,7 @@ export default class Level2 extends Scene {
             let groundMat = this.groundcontroller.M    
             program.setUniformMatrix4fv("M", false, groundMat);
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), groundMat));
-            program.setUniform4f("tint", [...this.systems["scene2"].tintground]);
+            program.setUniform4f("tint", [...this.systems["scene"].tintground]);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
@@ -384,7 +384,7 @@ export default class Level2 extends Scene {
             program.setUniformMatrix4fv("M_it", true, mat4.invert(mat4.create(), this.playercontroller.M));
 
             if(this.playercontroller.die === 0){
-                program.setUniform4f("tint", [...this.systems["scene2"].tintplayer]);
+                program.setUniform4f("tint", [...this.systems["scene"].tintplayer]);
             }
             else
             {
@@ -424,15 +424,15 @@ export default class Level2 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', this.systems["scene2"].fogdistance);//4
-                    program.setUniform4f('fog_color', [...this.systems["scene2"].fogcolor]);//3 0.76,0.83,0.56, 1
+                    program.setUniform1f('fog_distance', this.systems["scene"].fogdistance);//4
+                    program.setUniform4f('fog_color', [...this.systems["scene"].fogcolor]);//3 0.76,0.83,0.56, 1
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.create();
-                    vec3.add(light_direction,light_direction,[...this.systems["scene2"].lightdirection]);
+                    vec3.add(light_direction,light_direction,[...this.systems["scene"].lightdirection]);
                     vec3.normalize(light_direction, light_direction);
                     program.setUniform3f('light_direction', light_direction);
-                    program.setUniform4f('light_color', [...this.systems["scene2"].lightcolor]);//1
-                    program.setUniform4f('ambient_color', [...this.systems["scene2"].ambientcolor]);//2
+                    program.setUniform4f('light_color', [...this.systems["scene"].lightcolor]);//1
+                    program.setUniform4f('ambient_color', [...this.systems["scene"].ambientcolor]);//2
                     this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
 
                 }

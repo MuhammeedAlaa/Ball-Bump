@@ -14,7 +14,6 @@ interface SystemDescription {
     playerscale: number,
     groundscale: Array<number>,
     cubescale: number,
-    step:number,
     goundmovespeed:number,
     distanceofwave:number,
     backgroundcolor:Array<number>,
@@ -67,7 +66,6 @@ export default class level1 extends Scene {
 
     public start(): void {
         
-
         // This shader program will draw 3D objects
         this.systems = this.game.loader.resources["systems"];
         this.programs["3d"] = new ShaderProgram(this.gl);
@@ -180,7 +178,7 @@ export default class level1 extends Scene {
         mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
         let tr = vec3.create();
         vec3.add(tr,tr,[-9,1,0]);
-        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].step);
+        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].goundmovespeed);
 
 
                 
@@ -210,7 +208,7 @@ export default class level1 extends Scene {
             {
                 let v = vec3.create();
                 vec3.add(v,v,[x-dis,0,z]);
-                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].step);
+                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].goundmovespeed);
                 //Select the applied texture
                 let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
                 if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
