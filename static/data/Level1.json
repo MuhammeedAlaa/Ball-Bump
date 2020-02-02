@@ -8,7 +8,7 @@
     "goundobesdestance":0.1,
     "backgroundcolor":[0.67,0.84,0.9, 1],
     "fogcolor":[0.76,0.83,0.56, 1],
-    "fogdistance":4,
+    "fogdistance":40,
     "lightdirection":[1,0,0],
     "lightcolor":[1, 1, 1, 1],
     "ambientcolor":[0.1, 0.1, 0.1, 1],
