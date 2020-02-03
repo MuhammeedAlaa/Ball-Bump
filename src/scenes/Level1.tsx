@@ -14,9 +14,9 @@ interface SystemDescription {
     playerscale: number,
     groundscale: Array<number>,
     cubescale: number,
-    step:number,
     goundmovespeed:number,
     distanceofwave:number,
+    wavestep:number,
     backgroundcolor:Array<number>,
     fogcolor:Array<number>,
     fogdistance:number,
@@ -41,6 +41,8 @@ export default class level1 extends Scene {
     textures: { [name: string]: WebGLTexture } = {};
     samplers: { [name: string]: WebGLSampler } = {};
     systems: {[name:string]:SystemDescription};
+    fogdis: number;
+    disss: number;
     frameBuffer: WebGLFramebuffer; // This will hold the frame buffer object
     cubeNumber: number;
     readonly shaders = [
@@ -53,8 +55,6 @@ export default class level1 extends Scene {
         this.game.loader.load({
             ["mrt.vert"]: { url: 'shaders/mrt.vert', type: 'text' },
             ["mrt.frag"]: { url: 'shaders/mrt.frag', type: 'text' },
-            ["color.vert"]:{url:'shaders/color.vert', type:'text'},
-            ["color.frag"]:{url:'shaders/color.frag', type:'text'},
             ["fullscreen.vert"]: { url: 'shaders/post-process/fullscreen.vert', type: 'text' },
             ...Object.fromEntries(this.shaders.map((s) => [`${s}.frag`, { url: `shaders/post-process/${s}.frag`, type: 'text' }])),
             ["Ball-texture"]: { url: 'images/earth.jpg', type: 'image' },
@@ -69,7 +69,6 @@ export default class level1 extends Scene {
 
     public start(): void {
         
-
         // This shader program will draw 3D objects
         this.systems = this.game.loader.resources["systems"];
         this.programs["3d"] = new ShaderProgram(this.gl);
@@ -173,16 +172,18 @@ export default class level1 extends Scene {
         this.camera.direction = vec3.fromValues(-5, -9, 0);//-9
         this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
 
-
+        this.fogdis = this.systems['scene'].fogdistance;
         
         
-              
+        this.disss = 10000;      
         
         let PlayerMat = mat4.create();
         mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
         let tr = vec3.create();
         vec3.add(tr,tr,[-9,1,0]);
-        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].step);
+        console.log( this.systems["scene"].goundmovespeed);
+        
+        this.playercontroller = new PlayerController(PlayerMat,this.game.input,tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].goundmovespeed);
 
 
                 
@@ -212,7 +213,7 @@ export default class level1 extends Scene {
             {
                 let v = vec3.create();
                 vec3.add(v,v,[x-dis,0,z]);
-                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].step);
+                this.cubeController[index] = new ObstacleController(v ,this.systems["scene"].cubescale, this.systems["scene"].wavestep);
                 //Select the applied texture
                 let randomNumber = Math.floor(Math.random() * 6) + 1 //Get a random number from 1 to 6
                 if((index + randomNumber) % 7 == 0 || (index + randomNumber + 1) % 7 == 0)
@@ -263,7 +264,6 @@ export default class level1 extends Scene {
     public draw(deltaTime: number,time :number): void {
         window.requestAnimationFrame(()=>this.draw);
         
-        
         this.playercontroller.update(deltaTime);
         this.groundcontroller.update(); 
         
@@ -285,14 +285,11 @@ export default class level1 extends Scene {
                 for(let z = 1; z <= this.cubeNumber; z++)
                 this.cubeController[z].hold = 1;
                 break;
-
-                
-                
             }
             else
-            {
+            {                
                 for(let y = 1; y <= 7; y++)
-                if(this.playercontroller.gre > this.systems['scene'].distanceofwave + 50)//controls the distance i have to walk in the scene to generate another wave
+                if(this.playercontroller.gre > 0.2 )//controls the distance i have to walk in the scene to generate another wave
                 {
                     for(let z = 1; z <= this.cubeNumber; z++)
                         {
@@ -395,7 +392,19 @@ export default class level1 extends Scene {
                     this.gl.bindSampler(2, this.samplers['postprocess']);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                     program.setUniform1i('depth_sampler', 2);
-                    program.setUniform1f('fog_distance', this.systems["scene"].fogdistance);//4
+                    
+                    if(this.fogdis > 15){
+                    if(this.fogdis > 20){
+                        if(this.game.scoree > this.disss){
+                            this.fogdis -= 20;
+                            this.disss *= 2;
+                        } 
+                    }
+                 } else {
+                        this.fogdis -= 5;
+                    }
+                    
+                    program.setUniform1f('fog_distance', this.fogdis);//4
                     program.setUniform4f('fog_color', [...this.systems["scene"].fogcolor]);//3 0.76,0.83,0.56, 1
                     program.setUniformMatrix4fv('P_i', false, mat4.invert(mat4.create(), this.camera.ProjectionMatrix));
                     let light_direction = vec3.create();

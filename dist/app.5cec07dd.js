@@ -10335,12 +10335,6 @@ function (_super) {
     }, _a["mrt.frag"] = {
       url: 'shaders/mrt.frag',
       type: 'text'
-    }, _a["color.vert"] = {
-      url: 'shaders/color.vert',
-      type: 'text'
-    }, _a["color.frag"] = {
-      url: 'shaders/color.frag',
-      type: 'text'
     }, _a["fullscreen.vert"] = {
       url: 'shaders/post-process/fullscreen.vert',
       type: 'text'
@@ -10456,11 +10450,14 @@ function (_super) {
     this.camera.direction = gl_matrix_1.vec3.fromValues(-5, -9, 0); //-9
 
     this.camera.aspectRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
+    this.fogdis = this.systems['scene'].fogdistance;
+    this.disss = 10000;
     var PlayerMat = gl_matrix_1.mat4.create();
     gl_matrix_1.mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
     var tr = gl_matrix_1.vec3.create();
     gl_matrix_1.vec3.add(tr, tr, [-9, 1, 0]);
-    this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].step);
+    console.log(this.systems["scene"].goundmovespeed);
+    this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr, this.systems["scene"].groundscale[2] - 1, this.systems['scene'].goundmovespeed);
     var groundMat = gl_matrix_1.mat4.create();
     gl_matrix_1.mat4.scale(groundMat, groundMat, __spreadArrays(this.systems["scene"].groundscale));
     this.groundcontroller = new ground_controller_1.default(groundMat, this.systems["scene"].goundmovespeed, __spreadArrays(this.systems["scene"].groundscale));
@@ -10480,7 +10477,7 @@ function (_super) {
       for (var z = -12; z <= 12; z += 4) {
         var v = gl_matrix_1.vec3.create();
         gl_matrix_1.vec3.add(v, v, [x - dis, 0, z]);
-        this.cubeController[index] = new obstacle_controller_1.default(v, this.systems["scene"].cubescale, this.systems["scene"].step); //Select the applied texture
+        this.cubeController[index] = new obstacle_controller_1.default(v, this.systems["scene"].cubescale, this.systems["scene"].wavestep); //Select the applied texture
 
         var randomNumber = Math.floor(Math.random() * 6) + 1; //Get a random number from 1 to 6
 
@@ -10553,7 +10550,7 @@ function (_super) {
         break;
       } else {
         for (var y = 1; y <= 7; y++) {
-          if (this.playercontroller.gre > this.systems['scene'].distanceofwave + 50) //controls the distance i have to walk in the scene to generate another wave
+          if (this.playercontroller.gre > 0.2) //controls the distance i have to walk in the scene to generate another wave
             {
               for (var z = 1; z <= this.cubeNumber; z++) {
                 delete this.cubeController[z];
@@ -10640,7 +10637,19 @@ function (_super) {
       this.gl.bindSampler(2, this.samplers['postprocess']);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
       program.setUniform1i('depth_sampler', 2);
-      program.setUniform1f('fog_distance', this.systems["scene"].fogdistance); //4
+
+      if (this.fogdis > 15) {
+        if (this.fogdis > 20) {
+          if (this.game.scoree > this.disss) {
+            this.fogdis -= 20;
+            this.disss *= 2;
+          }
+        }
+      } else {
+        this.fogdis -= 5;
+      }
+
+      program.setUniform1f('fog_distance', this.fogdis); //4
 
       program.setUniform4f('fog_color', __spreadArrays(this.systems["scene"].fogcolor)); //3 0.76,0.83,0.56, 1
 
@@ -10815,12 +10824,6 @@ function (_super) {
     }, _a["mrt.frag"] = {
       url: 'shaders/mrt.frag',
       type: 'text'
-    }, _a["color.vert"] = {
-      url: 'shaders/color.vert',
-      type: 'text'
-    }, _a["color.frag"] = {
-      url: 'shaders/color.frag',
-      type: 'text'
     }, _a["fullscreen.vert"] = {
       url: 'shaders/post-process/fullscreen.vert',
       type: 'text'
@@ -10848,7 +10851,7 @@ function (_super) {
       url: 'models/Blue Cube/mlt_chr_pha_puz_dif_SD02.png',
       type: 'image'
     }, _b["systems"] = {
-      url: 'data/Level.json',
+      url: 'data/Level1.json',
       type: 'json'
     }, _b)));
   };
@@ -10931,6 +10934,8 @@ function (_super) {
       if (status == this.gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) console.error("The framebuffer has a type mismatch");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) console.error("The framebuffer is missing an attachment");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS) console.error("The framebuffer has dimension mismatch");else if (status == this.gl.FRAMEBUFFER_UNSUPPORTED) console.error("The framebuffer has an attachment with unsupported format");else if (status == this.gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) console.error("The framebuffer has multisample mismatch");else console.error("The framebuffer has an unknown error");
     }
 
+    this.fogdis = this.systems['scene'].fogdistance;
+    this.disss = 10000;
     this.samplers['regular'] = this.gl.createSampler();
     this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
     this.gl.samplerParameteri(this.samplers['regular'], this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
@@ -10952,11 +10957,11 @@ function (_super) {
     gl_matrix_1.mat4.translate(PlayerMat, PlayerMat, [-9, 1, 0]);
     var tr = gl_matrix_1.vec3.create();
     gl_matrix_1.vec3.add(tr, tr, [-9, 1, 0]);
-    this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr, this.systems["scene2"].groundscale[2] - 1, this.systems['scene'].step);
+    this.playercontroller = new Player_controller_1.default(PlayerMat, this.game.input, tr, this.systems["scene"].groundscale[2] - 1, this.systems["scene"].goundmovespeed);
     var groundMat = gl_matrix_1.mat4.create();
-    gl_matrix_1.mat4.scale(groundMat, groundMat, __spreadArrays(this.systems["scene2"].groundscale));
-    this.groundcontroller = new ground_controller_1.default(groundMat, this.systems["scene2"].goundmovespeed, __spreadArrays(this.systems["scene2"].groundscale));
-    this.createwave(this.systems["scene2"].distanceofwave);
+    gl_matrix_1.mat4.scale(groundMat, groundMat, __spreadArrays(this.systems["scene"].groundscale));
+    this.groundcontroller = new ground_controller_1.default(groundMat, this.systems["scene"].goundmovespeed, __spreadArrays(this.systems["scene"].groundscale));
+    this.createwave(this.systems["scene"].distanceofwave);
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
@@ -10976,7 +10981,7 @@ function (_super) {
       for (var z = -12; z <= 12; z += 4) {
         var v = gl_matrix_1.vec3.create();
         gl_matrix_1.vec3.add(v, v, [x - dis, 0, z]);
-        this.cubeController[index] = new obstacle_controller_1.default(v, this.systems["scene2"].cubescale, this.systems["scene2"].step); //Select the applied texture
+        this.cubeController[index] = new obstacle_controller_1.default(v, this.systems["scene"].cubescale, this.systems["scene"].wavestep); //Select the applied texture
 
         var randomNumber = Math.floor(Math.random() * 6) + 1; //Get a random number from 1 to 6
 
@@ -11043,14 +11048,14 @@ function (_super) {
         break;
       } else {
         for (var y = 1; y <= 7; y++) {
-          if (this.playercontroller.gre > this.systems['scene'].distanceofwave + 50) //controls the distance i have to walk in the scene to generate another wave
+          if (this.playercontroller.gre > 0.2) //controls the distance i have to walk in the scene to generate another wave
             {
               for (var z = 1; z <= this.cubeNumber; z++) {
                 delete this.cubeController[z];
               }
 
               this.playercontroller.gre = 0;
-              this.createwave(this.systems["scene2"].distanceofwave);
+              this.createwave(this.systems["scene"].distanceofwave);
             }
         } //4
 
@@ -11062,7 +11067,7 @@ function (_super) {
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     {
       this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0, this.gl.COLOR_ATTACHMENT1]);
-      this.gl.clearBufferfv(this.gl.COLOR, 0, __spreadArrays(this.systems["scene2"].backgroundcolor)); //0.67,0.84,0.9, 1
+      this.gl.clearBufferfv(this.gl.COLOR, 0, __spreadArrays(this.systems["scene"].backgroundcolor)); //0.67,0.84,0.9, 1
 
       this.gl.clearBufferfv(this.gl.COLOR, 1, [0, 0, 0, 1]);
       this.gl.clearBufferfi(this.gl.DEPTH_STENCIL, 0, 1, 0);
@@ -11075,7 +11080,7 @@ function (_super) {
         program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix);
         program.setUniformMatrix4fv("M", false, MatCube);
         program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), MatCube));
-        program.setUniform4f("tint", __spreadArrays(this.systems["scene2"].tintcubes));
+        program.setUniform4f("tint", __spreadArrays(this.systems["scene"].tintcubes));
         this.gl.activeTexture(this.gl.TEXTURE3);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures[this.cubeController[x].texturetype]);
         program.setUniform1i('texture_sampler', 3);
@@ -11091,7 +11096,7 @@ function (_super) {
       gl_matrix_1.mat4.scale(backgroundMat, backgroundMat, [540, 1, 960]);
       program.setUniformMatrix4fv("M", false, backgroundMat);
       program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), backgroundMat));
-      program.setUniform4f("tint", __spreadArrays(this.systems["scene2"].tintground));
+      program.setUniform4f("tint", __spreadArrays(this.systems["scene"].tintground));
       this.gl.activeTexture(this.gl.TEXTURE0);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Background']);
       program.setUniform1i('texture_sampler', 0);
@@ -11100,7 +11105,7 @@ function (_super) {
       var groundMat = this.groundcontroller.M;
       program.setUniformMatrix4fv("M", false, groundMat);
       program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), groundMat));
-      program.setUniform4f("tint", __spreadArrays(this.systems["scene2"].tintground));
+      program.setUniform4f("tint", __spreadArrays(this.systems["scene"].tintground));
       this.gl.activeTexture(this.gl.TEXTURE0);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['Ground']);
       program.setUniform1i('texture_sampler', 0);
@@ -11110,7 +11115,7 @@ function (_super) {
       program.setUniformMatrix4fv("M_it", true, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), this.playercontroller.M));
 
       if (this.playercontroller.die === 0) {
-        program.setUniform4f("tint", __spreadArrays(this.systems["scene2"].tintplayer));
+        program.setUniform4f("tint", __spreadArrays(this.systems["scene"].tintplayer));
       } else {
         program.setUniform4f("tint", [1, (Math.abs(Math.sin(time * 1000)) + 0.5) / 2 + 0.2, (Math.abs(Math.sin(time * 50)) + 0.2) / 2 + 0.5, 1]);
       }
@@ -11139,18 +11144,31 @@ function (_super) {
       this.gl.bindSampler(2, this.samplers['postprocess']);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
       program.setUniform1i('depth_sampler', 2);
-      program.setUniform1f('fog_distance', this.systems["scene2"].fogdistance); //4
 
-      program.setUniform4f('fog_color', __spreadArrays(this.systems["scene2"].fogcolor)); //3 0.76,0.83,0.56, 1
+      if (this.fogdis > 15) {
+        if (this.fogdis > 20) {
+          if (this.game.scoree > this.disss) {
+            this.fogdis -= 20;
+            this.disss *= 2;
+            console.log(this.fogdis);
+          }
+        }
+      } else {
+        this.fogdis -= 5;
+      }
+
+      program.setUniform1f('fog_distance', this.fogdis); //4
+
+      program.setUniform4f('fog_color', __spreadArrays(this.systems["scene"].fogcolor)); //3 0.76,0.83,0.56, 1
 
       program.setUniformMatrix4fv('P_i', false, gl_matrix_1.mat4.invert(gl_matrix_1.mat4.create(), this.camera.ProjectionMatrix));
       var light_direction = gl_matrix_1.vec3.create();
-      gl_matrix_1.vec3.add(light_direction, light_direction, __spreadArrays(this.systems["scene2"].lightdirection));
+      gl_matrix_1.vec3.add(light_direction, light_direction, __spreadArrays(this.systems["scene"].lightdirection));
       gl_matrix_1.vec3.normalize(light_direction, light_direction);
       program.setUniform3f('light_direction', light_direction);
-      program.setUniform4f('light_color', __spreadArrays(this.systems["scene2"].lightcolor)); //1
+      program.setUniform4f('light_color', __spreadArrays(this.systems["scene"].lightcolor)); //1
 
-      program.setUniform4f('ambient_color', __spreadArrays(this.systems["scene2"].ambientcolor)); //2
+      program.setUniform4f('ambient_color', __spreadArrays(this.systems["scene"].ambientcolor)); //2
 
       this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
     }
@@ -11265,7 +11283,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63581" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57196" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
