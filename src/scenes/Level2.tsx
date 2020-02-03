@@ -27,7 +27,8 @@ interface SystemDescription {
     tintplayer: Array<number>,
     tintground:Array<number>,
     tintcubes:Array<number>
-};
+};  
+
 
 // In this scene we will draw a scene to multiple targets then use the target to do post processing
 export default class Level2 extends Scene {
@@ -50,6 +51,7 @@ export default class Level2 extends Scene {
     inc_x:number[]=[4,4,4,4];
     fogdis: number;
     disss: number;
+    diss:number;
 
 
     public load(): void {
