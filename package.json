@@ -26,6 +26,7 @@
     "@types/react-dom": "^16.9.4",
     "cannon": "github:schteppe/cannon.js",
     "gl-matrix": "^3.1.0",
+    "mime": "^2.4.4",
     "ts-key-enum": "^2.0.0",
     "tsx-create-element": "^2.0.0",
     "webgl-obj-loader": "^2.0.3"
