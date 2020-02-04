@@ -1,7 +1,7 @@
 {
-  "name": "gfx-lab-3",
+  "name": "ball-bump",
   "version": "1.0.0",
-  "description": "Lab 3 for CMP[N]205 (CUFE CCE-C) using WebGL",
+  "description": "Sample Game using WebGL",
   "main": "index.html",
   "scripts": {
     "watch": "parcel index.html",
@@ -11,7 +11,7 @@
     "staticPath": "static",
     "watcherGlob": "**"
   },
-  "author": "Yahia Zakaria",
+  "author": "Muhammad Alaa & Muhammad Hisham & Mahmoud Amr & Eman",
   "license": "MIT",
   "devDependencies": {
     "@types/gl-matrix": "^2.4.5",
