@@ -9,7 +9,7 @@
 6. Ctrl + click the link shown in the terminal (usually it will be http://localhost:1234).
 ## To run on web
 go to this link https://muhammeedalaa.github.io/Ball-Bump/
-**Note:** control in 'A' to move left 'D' to move right
+**Note:** controls is 'A' to move left 'D' to move right
 
 **Note:** you can use yarn to enable caching so that you don't download all the packages with project. You can download yarn from [yarnpkg.com](https://yarnpkg.com/lang/en/). Then replace `npm install` with `yarn install` and `npm run watch` with `yarn watch`.
 
