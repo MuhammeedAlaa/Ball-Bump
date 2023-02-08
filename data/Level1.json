@@ -1,0 +1,20 @@
+{
+    "scene": {
+    "playerscale": 1,
+    "groundscale": [100,1,20],
+    "cubescale": 0.4,
+    "goundmovespeed":0.001,
+    "distanceofwave":80,
+    "wavestep": 0.6,
+    "goundobesdestance":0.1,
+    "backgroundcolor":[0.67,0.84,0.9, 1],
+    "fogcolor":[0.76,0.83,0.56, 1],
+    "fogdistance":100,
+    "lightdirection":[1,0,0],
+    "lightcolor":[1, 1, 1, 1],
+    "ambientcolor":[0.1, 0.1, 0.1, 1],
+    "tintplayer": [1, 1, 1, 1],
+    "tintground":[0.96, 0.91, 0.64, 1],
+    "tintcubes":[1, 1, 1, 1]
+    }
+}
